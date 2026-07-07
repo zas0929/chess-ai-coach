@@ -5,14 +5,30 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 First, run the development server and backend:
 
 ```bash
-npm run dev #from fronend folder
-uvicorn app.main:app --reload #from backend folder
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm i
+
+npm run dev #from frontend folder
+
+Backend:
+
+cd backend
+Создаем виртуальное окружение:
+
+python3 -m venv .venv
+
+Активируем:
+macOS/Linux
+
+source .venv/bin/activate
+
+Устанавливаем:
+
+pip install -r requirements.txt
+
+Запуск:
+
+uvicorn app.main:app --reload
+
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
