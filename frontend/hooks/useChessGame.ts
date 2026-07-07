@@ -140,46 +140,69 @@ export function useChessGame() {
   }, [game, findKingSquare]);
 
   const makeEngineMove = useCallback(async () => {
+  setThinking(true);
 
-    setThinking(true);
+  try {
+    const request = {
+      fen: game.fen(),
+      settings: {
+        skill_level: skillLevel,
+        move_time: moveTime,
+        depth,
+      },
+    };
 
-    try {
-      const response = await EngineService.getBestMove({
-        fen: game.fen(),
+    console.log('ENGINE REQUEST', request);
+
+    const response =
+      await EngineService.getBestMove(request);
+
+    console.log('ENGINE RESPONSE', response);
+
+    if (response.stats) {
+      setEngineStats(response.stats);
+    }
+
+    if (!response.move) {
+      return;
+    }
+
+    const aiMove = game.move(response.move);
+
+    if (aiMove) {
+      setLastMove({
+        from: aiMove.from,
+        to: aiMove.to,
       });
 
-      if (response.stats) {
-        setEngineStats(response.stats);
-      }
-
-      if (!response.move) {
-        return;
-      }
-
-      const aiMove = game.move(response.move);
-
-      if (aiMove) {
-        setLastMove({
-          from: aiMove.from,
-          to: aiMove.to,
-        });
-
-        updateState();
-      }
-
-      if (response.evaluation.type === 'cp') {
-        setEvaluation(response.evaluation.value / 100);
-      }
-
-      if (response.evaluation.type === 'mate') {
-        setEvaluation(response.evaluation.value > 0 ? 999 : -999);
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setThinking(false);
+      updateState();
     }
-  }, [game, updateState]);
+
+    if (response.evaluation.type === 'cp') {
+      setEvaluation(
+        response.evaluation.value / 100,
+      );
+    }
+
+    if (response.evaluation.type === 'mate') {
+      setEvaluation(
+        response.evaluation.value > 0
+          ? 999
+          : -999,
+      );
+    }
+  } catch (error) {
+    console.error(error);
+  } finally {
+    setThinking(false);
+  }
+}, [
+  game,
+  updateState,
+  skillLevel,
+  moveTime,
+  depth,
+]);
 
   const flipBoard = useCallback(() => {
   setPlayerColor((color) =>
@@ -281,6 +304,11 @@ const chooseSide = useCallback(
         const response =
           await EngineService.getBestMove({
             fen: game.fen(),
+            settings: {
+              skill_level: skillLevel,
+              move_time: moveTime,
+              depth,
+            },
           });
         
         if (response.stats) {

@@ -8,4 +8,7 @@ router = APIRouter()
 
 @router.post("/move")
 def move(data: MoveRequest):
-    return stockfish_service.best_move(data.fen)
+    return stockfish_service.best_move(
+        data.fen,
+        data.settings,
+    )

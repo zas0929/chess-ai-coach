@@ -126,7 +126,14 @@ export default function HomePage() {
           </Panel>
 
           <Panel>
-            <ThinkingIndicator stats={engineStats} />
+            <ThinkingIndicator
+              stats={{
+                ...engineStats,
+                skill_level: skillLevel,
+                depth,
+                move_time: moveTime,
+              }}
+            />
           </Panel>
 
           <Panel>

@@ -1,5 +1,12 @@
+export interface EngineSettings {
+  skill_level: number;
+  move_time: number;
+  depth: number;
+}
+
 export interface EngineMoveRequest {
   fen: string;
+  settings?: EngineSettings;
 }
 
 export interface Evaluation {
@@ -7,12 +14,15 @@ export interface Evaluation {
   value: number;
 }
 
+export interface EngineStats {
+  time: number;
+  skill_level: number;
+  depth: number;
+  move_time: number;
+}
+
 export interface EngineMoveResponse {
   move: string;
   evaluation: Evaluation;
-}
-
-export interface MoveHistoryItem {
-  san: string;
-  color: 'w' | 'b';
+  stats?: EngineStats;
 }
