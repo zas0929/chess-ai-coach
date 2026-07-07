@@ -38,7 +38,7 @@ export default function HomePage() {
     boardOrientation === 'white'
       ? {
           label: 'Black',
-          color: 'black' as const,
+          color: 'white' as const,
           pieces: material.blackCaptured,
           advantage:
             material.advantage.side === 'white'
@@ -47,7 +47,7 @@ export default function HomePage() {
         }
       : {
           label: 'White',
-          color: 'white' as const,
+          color: 'black' as const,
           pieces: material.whiteCaptured,
           advantage:
             material.advantage.side === 'black'
@@ -59,7 +59,7 @@ export default function HomePage() {
     boardOrientation === 'white'
       ? {
           label: 'White',
-          color: 'white' as const,
+          color: 'black' as const,
           pieces: material.whiteCaptured,
           advantage:
             material.advantage.side === 'black'
@@ -68,7 +68,7 @@ export default function HomePage() {
         }
       : {
           label: 'Black',
-          color: 'black' as const,
+          color: 'white' as const,
           pieces: material.blackCaptured,
           advantage:
             material.advantage.side === 'white'
