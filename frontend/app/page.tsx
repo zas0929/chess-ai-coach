@@ -92,7 +92,7 @@ export default function HomePage() {
       <div className="grid grid-cols-[minmax(650px,760px)_1fr] gap-6">
         <section>
           
-          <CapturedPieces {...topCaptured} />
+          <CapturedPieces {...bottomCaptured} />
 
           <ChessBoard
             boardOrientation={boardOrientation}
@@ -106,7 +106,7 @@ export default function HomePage() {
             isCheckmate={isCheckmate}
           />
 
-          <CapturedPieces {...bottomCaptured} />
+          <CapturedPieces {...topCaptured} />
           
         </section>
 
