@@ -11,6 +11,7 @@ import GameStatus from '@/components/Chess/GameStatus';
 import AppShell from '@/components/Chess/AppShell';
 import TopGameBar from '@/components/Chess/TopGameBar';
 import Panel from '@/components/Chess/Panel';
+import EngineSettings from '@/components/Chess/EngineSettings';
 
 export default function HomePage() {
   const {
@@ -35,6 +36,12 @@ export default function HomePage() {
     chooseSide,
     gameStatus,
     winner,
+    skillLevel,
+    moveTime,
+    depth,
+    setSkillLevel,
+    setMoveTime,
+    setDepth,
   } = useChessGame();
 
   const topCaptured =
@@ -120,6 +127,17 @@ export default function HomePage() {
 
           <Panel>
             <ThinkingIndicator stats={engineStats} />
+          </Panel>
+
+          <Panel>
+            <EngineSettings
+              skillLevel={skillLevel}
+              moveTime={moveTime}
+              depth={depth}
+              onSkillLevelChange={setSkillLevel}
+              onMoveTimeChange={setMoveTime}
+              onDepthChange={setDepth}
+            />
           </Panel>
 
           <GameStatus

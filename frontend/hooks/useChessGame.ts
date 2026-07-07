@@ -59,6 +59,10 @@ export function useChessGame() {
 
   const [winner, setWinner] =
     useState<'white' | 'black' | null>(null);
+  
+  const [skillLevel, setSkillLevel] = useState(10);
+  const [moveTime, setMoveTime] = useState(500);
+  const [depth, setDepth] = useState(12);
 
   const findKingSquare = useCallback(() => {
   const turn = game.turn();
@@ -415,5 +419,11 @@ const chooseSide = useCallback(
     chooseSide,
     gameStatus,
     winner,
+    skillLevel,
+    moveTime,
+    depth,
+    setSkillLevel,
+    setMoveTime,
+    setDepth,
   };
 }
