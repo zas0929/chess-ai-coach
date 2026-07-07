@@ -7,6 +7,7 @@ import ChessControls from '@/components/Chess/ChessControls';
 import ThinkingIndicator from '@/components/Chess/ThinkingIndicator';
 import { useChessGame } from '@/hooks/useChessGame';
 import CapturedPieces from '@/components/Chess/CapturedPieces';
+import GameStatus from '@/components/Chess/GameStatus';
 
 export default function HomePage() {
   const {
@@ -29,6 +30,8 @@ export default function HomePage() {
     boardOrientation,
     flipBoard,
     chooseSide,
+    gameStatus,
+    winner,
   } = useChessGame();
 
   const topCaptured =
@@ -109,6 +112,11 @@ export default function HomePage() {
 
         <aside className="grid grid-cols-2 gap-4">
           <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-2xl">
+            <GameStatus
+              status={gameStatus}
+              winner={winner}
+              onNewGame={newGame}
+            />
             <ThinkingIndicator stats={engineStats} />
           </div>
 

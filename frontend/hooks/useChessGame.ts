@@ -52,6 +52,14 @@ export function useChessGame() {
 
   const boardOrientation = playerColor;
 
+  const [gameStatus, setGameStatus] =
+    useState<'playing' | 'check' | 'checkmate' | 'draw' | 'stalemate'>(
+      'playing',
+    );
+
+  const [winner, setWinner] =
+    useState<'white' | 'black' | null>(null);
+
   const findKingSquare = useCallback(() => {
   const turn = game.turn();
   const board = game.board();
@@ -108,6 +116,23 @@ export function useChessGame() {
     }
 
     setIsCheckmate(game.isCheckmate());
+
+    if (game.isCheckmate()) {
+      setGameStatus('checkmate');
+      setWinner(game.turn() === 'w' ? 'black' : 'white');
+    } else if (game.isStalemate()) {
+      setGameStatus('stalemate');
+      setWinner(null);
+    } else if (game.isDraw()) {
+      setGameStatus('draw');
+      setWinner(null);
+    } else if (game.isCheck()) {
+      setGameStatus('check');
+      setWinner(null);
+    } else {
+      setGameStatus('playing');
+      setWinner(null);
+    }
   }, [game, findKingSquare]);
 
   const makeEngineMove = useCallback(async () => {
@@ -345,6 +370,10 @@ const chooseSide = useCallback(
     setCheckedKingSquare(null);
 
     setIsCheckmate(false);
+
+    setGameStatus('playing');
+    
+    setWinner(null);
   }, [game, updateState]);
 
   const undo = useCallback(() => {
@@ -384,5 +413,7 @@ const chooseSide = useCallback(
     isCheckmate,
     boardOrientation,
     chooseSide,
+    gameStatus,
+    winner,
   };
 }
