@@ -152,12 +152,8 @@ export function useChessGame() {
       },
     };
 
-    console.log('ENGINE REQUEST', request);
-
     const response =
       await EngineService.getBestMove(request);
-
-    console.log('ENGINE RESPONSE', response);
 
     if (response.stats) {
       setEngineStats(response.stats);
@@ -174,6 +170,16 @@ export function useChessGame() {
         from: aiMove.from,
         to: aiMove.to,
       });
+
+      if (game.isCheckmate()) {
+        SoundService.play('checkmate');
+      } else if (game.isCheck()) {
+        SoundService.play('check');
+      } else if (aiMove.captured) {
+        SoundService.play('capture');
+      } else {
+        SoundService.play('move');
+      }
 
       updateState();
     }
@@ -235,160 +241,61 @@ const chooseSide = useCallback(
     },
     [game, updateState, makeEngineMove],
   );
-  
+
   const onDrop = useCallback(
-    async (
-      sourceSquare: Square,
-      targetSquare: Square,
-    ) => {
-      if (thinking) {
-        return false;
-      }
+  async (
+    sourceSquare: Square,
+    targetSquare: Square,
+  ) => {
+    if (thinking) {
+      return false;
+    }
 
-      if (game.inCheck()) {
-        SoundService.play('check');
-      }
+    const playerMove = game.move({
+      from: sourceSquare,
+      to: targetSquare,
+      promotion: 'q',
+    });
 
-      const playerMove = game.move({
-        from: sourceSquare,
-        to: targetSquare,
-        promotion: 'q',
-      });
+    if (!playerMove) {
+      return false;
+    }
 
-      if (!playerMove) {
-        return false;
-      }
+    setSelectedSquare(null);
+    setPossibleMoves([]);
 
-      if (!playerMove) {
-          return false;
-      }
+    setLastMove({
+      from: playerMove.from,
+      to: playerMove.to,
+    });
 
-      // Уже после изменения позиции
-      if (game.isCheckmate()) {
-        SoundService.play('checkmate');
-        ToastService.success('Checkmate!');
-      }
+    if (game.isCheckmate()) {
+      SoundService.play('checkmate');
+    } else if (game.isCheck()) {
+      SoundService.play('check');
+    } else if (playerMove.captured) {
+      SoundService.play('capture');
+    } else {
+      SoundService.play('move');
+    }
 
-      if (game.isDraw()) {
-        ToastService.info('Draw!');
-      }
+    updateState();
 
-      if (game.isStalemate()) {
-        ToastService.info('Stalemate!');
-      }
+    if (game.isGameOver()) {
+      return true;
+    }
 
-      if (game.isCheck()) {
-        ToastService.info('Check!');
-      }
+    await makeEngineMove();
 
-      setSelectedSquare(null);
-
-      setPossibleMoves([]);
-
-      setLastMove({
-        from: playerMove.from,
-        to: playerMove.to,
-      });
-
-      if (playerMove.captured) {
-        SoundService.play('capture');
-      } else {
-        SoundService.play('move');
-      }
-
-      updateState();
-
-      setThinking(true);
-
-      try {
-        const response =
-          await EngineService.getBestMove({
-            fen: game.fen(),
-            settings: {
-              skill_level: skillLevel,
-              move_time: moveTime,
-              depth,
-            },
-          });
-        
-        if (response.stats) {
-          setEngineStats(response.stats);
-        }
-
-        if (!response.move) {
-          setThinking(false);
-          return true;
-        }
-
-        const aiMove = game.move(response.move);
-
-        if (aiMove) {
-          setLastMove({
-            from: aiMove.from,
-            to: aiMove.to,
-          });
-
-          updateState();
-
-          // Уже после изменения позиции
-          if (game.isCheckmate()) {
-            SoundService.play('checkmate');
-            ToastService.success('Checkmate!');
-          }
-
-          if (game.isDraw()) {
-              ToastService.info('Draw!');
-          }
-
-          if (game.isStalemate()) {
-              ToastService.info('Stalemate!');
-          }
-
-          if (game.isCheck()) {
-              ToastService.info('Check!');
-          }
-
-        }
-
-        setSelectedSquare(null);
-
-        setPossibleMoves([]);
-
-        if (aiMove.captured) {
-          SoundService.play('capture');
-        } else {
-          SoundService.play('move');
-        }
-
-        if (game.inCheck()) {
-          SoundService.play('check');
-        }
-
-        if (response.evaluation.type === 'cp') {
-          setEvaluation(
-            response.evaluation.value / 100,
-          );
-        }
-
-        if (response.evaluation.type === 'mate') {
-          setEvaluation(
-            response.evaluation.value > 0
-              ? 999
-              : -999,
-          );
-        }
-
-        return true;
-      } catch (err) {
-        console.error(err);
-
-        return false;
-      } finally {
-        setThinking(false);
-      }
-    },
-    [game, thinking, updateState],
-  );
+    return true;
+  },
+  [
+    game,
+    thinking,
+    updateState,
+    makeEngineMove,
+  ],
+);
 
   const newGame = useCallback(() => {
     game.reset();
