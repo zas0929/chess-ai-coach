@@ -8,6 +8,9 @@ import ThinkingIndicator from '@/components/Chess/ThinkingIndicator';
 import { useChessGame } from '@/hooks/useChessGame';
 import CapturedPieces from '@/components/Chess/CapturedPieces';
 import GameStatus from '@/components/Chess/GameStatus';
+import AppShell from '@/components/Chess/AppShell';
+import TopGameBar from '@/components/Chess/TopGameBar';
+import Panel from '@/components/Chess/Panel';
 
 export default function HomePage() {
   const {
@@ -77,70 +80,65 @@ export default function HomePage() {
         };
 
   return (
-    <main className="min-h-screen bg-[#0f1720] text-zinc-100 p-8">
-      <header className="mb-6 flex items-end justify-between">
-        <div>
-          <h1 className="text-4xl font-semibold tracking-tight">
-            ♔ Chess AI Coach
-          </h1>
-          <p className="mt-1 text-zinc-400">
-            Train. Analyze. Improve.
-          </p>
-        </div>
-      </header>
-
-      <div className="grid grid-cols-[minmax(650px,760px)_1fr] gap-6">
-        <section>
-          
-          <CapturedPieces {...bottomCaptured} />
-
-          <ChessBoard
-            boardOrientation={boardOrientation}
-            position={fen}
-            onDrop={onDrop}
-            lastMove={lastMove}
-            onSquareClick={selectPiece}
-            possibleMoves={possibleMoves}
-            selectedSquare={selectedSquare}
-            checkedKingSquare={checkedKingSquare}
-            isCheckmate={isCheckmate}
+    <AppShell>
+      <div className="grid grid-cols-[minmax(680px,1fr)_420px] gap-5">
+        <section className="min-w-0">
+          <TopGameBar
+            playerColor={playerColor}
+            onChooseSide={chooseSide}
+            onFlipBoard={flipBoard}
+            onNewGame={newGame}
           />
 
+          <CapturedPieces {...bottomCaptured} />
+
+          <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] shadow-2xl">
+            <ChessBoard
+              position={fen}
+              boardOrientation={boardOrientation}
+              onDrop={onDrop}
+              lastMove={lastMove}
+              onSquareClick={selectPiece}
+              possibleMoves={possibleMoves}
+              selectedSquare={selectedSquare}
+              checkedKingSquare={checkedKingSquare}
+              isCheckmate={isCheckmate}
+            />
+          </div>
+
           <CapturedPieces {...topCaptured} />
-          
         </section>
 
-        <aside className="grid grid-cols-2 gap-4">
-          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-2xl">
-            <GameStatus
-              status={gameStatus}
-              winner={winner}
-              onNewGame={newGame}
-            />
-            <ThinkingIndicator stats={engineStats} />
-          </div>
-
-          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-2xl">
+        <aside className="grid gap-4">
+          <Panel>
             <EvaluationBar value={evaluation} />
-          </div>
+          </Panel>
 
-          <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-2xl">
+          <Panel>
             <MoveHistory moves={moves} />
-          </div>
+          </Panel>
 
-          <div className="flex flex-col gap-4">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-2xl">
-              <ChessControls
-                playerColor={playerColor}
-                onNewGame={newGame}
-                onUndo={undo}
-                onFlipBoard={flipBoard}
-                onChooseSide={chooseSide}
-              />
-            </div>
-          </div>
+          <Panel>
+            <ThinkingIndicator stats={engineStats} />
+          </Panel>
+
+          <GameStatus
+            status={gameStatus}
+            winner={winner}
+            onNewGame={newGame}
+          />
+
+          <Panel>
+            <ChessControls
+              playerColor={playerColor}
+              onNewGame={newGame}
+              onUndo={undo}
+              onFlipBoard={flipBoard}
+              onChooseSide={chooseSide}
+            />
+          </Panel>
         </aside>
       </div>
-    </main>
+    </AppShell>
   );
 }
