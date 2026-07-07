@@ -25,7 +25,53 @@ export default function HomePage() {
     material,
     checkedKingSquare,
     isCheckmate,
+    playerColor,
+    boardOrientation,
+    flipBoard,
+    chooseSide,
   } = useChessGame();
+
+  const topCaptured =
+    boardOrientation === 'white'
+      ? {
+          label: 'Black',
+          color: 'black' as const,
+          pieces: material.blackCaptured,
+          advantage:
+            material.advantage.side === 'white'
+              ? material.advantage.value
+              : 0,
+        }
+      : {
+          label: 'White',
+          color: 'white' as const,
+          pieces: material.whiteCaptured,
+          advantage:
+            material.advantage.side === 'black'
+              ? material.advantage.value
+              : 0,
+        };
+
+  const bottomCaptured =
+    boardOrientation === 'white'
+      ? {
+          label: 'White',
+          color: 'white' as const,
+          pieces: material.whiteCaptured,
+          advantage:
+            material.advantage.side === 'black'
+              ? material.advantage.value
+              : 0,
+        }
+      : {
+          label: 'Black',
+          color: 'black' as const,
+          pieces: material.blackCaptured,
+          advantage:
+            material.advantage.side === 'white'
+              ? material.advantage.value
+              : 0,
+        };
 
   return (
     <main className="min-h-screen bg-[#0f1720] text-zinc-100 p-8">
@@ -43,16 +89,10 @@ export default function HomePage() {
       <div className="grid grid-cols-[minmax(650px,760px)_1fr] gap-6">
         <section>
           
-          <CapturedPieces
-            pieces={material.whiteCaptured}
-            advantage={
-              material.advantage.side === 'black'
-                ? material.advantage.value
-                : 0
-            }
-          />
+          <CapturedPieces {...topCaptured} />
 
           <ChessBoard
+            boardOrientation={boardOrientation}
             position={fen}
             onDrop={onDrop}
             lastMove={lastMove}
@@ -63,14 +103,7 @@ export default function HomePage() {
             isCheckmate={isCheckmate}
           />
 
-          <CapturedPieces
-            pieces={material.blackCaptured}
-            advantage={
-              material.advantage.side === 'white'
-                ? material.advantage.value
-                : 0
-            }
-          />
+          <CapturedPieces {...bottomCaptured} />
           
         </section>
 
@@ -90,8 +123,11 @@ export default function HomePage() {
           <div className="flex flex-col gap-4">
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-2xl">
               <ChessControls
+                playerColor={playerColor}
                 onNewGame={newGame}
                 onUndo={undo}
+                onFlipBoard={flipBoard}
+                onChooseSide={chooseSide}
               />
             </div>
           </div>

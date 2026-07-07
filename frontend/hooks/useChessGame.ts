@@ -49,15 +49,8 @@ export function useChessGame() {
 
   const [isCheckmate, setIsCheckmate] =
     useState(false);
-  const boardOrientation = playerColor;
 
-  const flipBoard = () => {
-    setPlayerColor(color =>
-        color === 'white'
-            ? 'black'
-            : 'white'
-    );
-  };
+  const boardOrientation = playerColor;
 
   const findKingSquare = useCallback(() => {
   const turn = game.turn();
@@ -117,6 +110,80 @@ export function useChessGame() {
     setIsCheckmate(game.isCheckmate());
   }, [game, findKingSquare]);
 
+  const makeEngineMove = useCallback(async () => {
+
+    setThinking(true);
+
+    try {
+      const response = await EngineService.getBestMove({
+        fen: game.fen(),
+      });
+
+      if (response.stats) {
+        setEngineStats(response.stats);
+      }
+
+      if (!response.move) {
+        return;
+      }
+
+      const aiMove = game.move(response.move);
+
+      if (aiMove) {
+        setLastMove({
+          from: aiMove.from,
+          to: aiMove.to,
+        });
+
+        updateState();
+      }
+
+      if (response.evaluation.type === 'cp') {
+        setEvaluation(response.evaluation.value / 100);
+      }
+
+      if (response.evaluation.type === 'mate') {
+        setEvaluation(response.evaluation.value > 0 ? 999 : -999);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setThinking(false);
+    }
+  }, [game, updateState]);
+
+  const flipBoard = useCallback(() => {
+  setPlayerColor((color) =>
+    color === 'white' ? 'black' : 'white',
+  );
+}, []);
+
+const chooseSide = useCallback(
+    async (color: 'white' | 'black' | 'random') => {
+      const selectedColor =
+        color === 'random'
+          ? Math.random() > 0.5
+            ? 'white'
+            : 'black'
+          : color;
+
+      game.reset();
+
+      setPlayerColor(selectedColor);
+      setEvaluation(0);
+      setLastMove(null);
+      setSelectedSquare(null);
+      setPossibleMoves([]);
+
+      updateState();
+
+      if (selectedColor === 'black') {
+        await makeEngineMove();
+      }
+    },
+    [game, updateState, makeEngineMove],
+  );
+  
   const onDrop = useCallback(
     async (
       sourceSquare: Square,
@@ -294,6 +361,7 @@ export function useChessGame() {
 
     updateState();
   }, [game, updateState]);
+  
 
   return {
     fen,
@@ -314,5 +382,7 @@ export function useChessGame() {
     material,
     checkedKingSquare,
     isCheckmate,
+    boardOrientation,
+    chooseSide,
   };
 }
