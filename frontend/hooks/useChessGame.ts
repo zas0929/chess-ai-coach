@@ -208,10 +208,11 @@ export function useChessGame() {
     [game],
   );
 
-  const evaluateCurrentPosition = useCallback(
-    async () => {
-      const response = await EngineService.evaluate({
-        fen: game.fen(),
+  const analyzePlayerMove = useCallback(
+    async (fenBefore: string, fenAfter: string) => {
+      const response = await EngineService.analyzeMove({
+        fen_before: fenBefore,
+        fen_after: fenAfter,
         settings: {
           skill_level: skillLevel,
           move_time: moveTime,
@@ -223,12 +224,10 @@ export function useChessGame() {
         setEngineStats(response.stats);
       }
 
-      const value =
-        normalizeEvaluation(response.evaluation);
+      const value = normalizeEvaluation(response.evaluation);
 
       const history = game.history();
-      const lastMoveSan =
-        history[history.length - 1] ?? '';
+      const lastMoveSan = history[history.length - 1] ?? '';
 
       appendEvaluationPoint({
         value,
@@ -412,9 +411,12 @@ const chooseSide = useCallback(
       if (!isLivePosition) {
         return false;
       }
+
       if (thinking) {
         return false;
       }
+
+      const fenBeforePlayerMove = game.fen();
 
       const playerMove = game.move({
         from: sourceSquare,
@@ -445,8 +447,13 @@ const chooseSide = useCallback(
       }
 
       updateState();
+
+      const fenAfterPlayerMove = game.fen();
         
-      await evaluateCurrentPosition();
+      await analyzePlayerMove(
+        fenBeforePlayerMove,
+        fenAfterPlayerMove,
+      );
 
       if (game.isGameOver()) {
         return true;
@@ -556,7 +563,7 @@ const chooseSide = useCallback(
     setMoveTime,
     setDepth,
     evaluationHistory,
-    evaluateCurrentPosition,
+    analyzePlayerMove,
     displayedFen,
     viewPly,
     totalPly,

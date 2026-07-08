@@ -37,3 +37,15 @@ export interface EngineEvaluateResponse {
   best_move?: string;
   stats?: EngineStats;
 }
+
+export interface EngineAnalyzeMoveRequest {
+  fen_before: string;
+  fen_after: string;
+  settings?: EngineSettings;
+}
+
+export interface EngineAnalyzeMoveResponse {
+  evaluation: Evaluation;
+  best_move?: string;
+  stats?: EngineStats;
+}

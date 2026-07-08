@@ -17,3 +17,8 @@ class MoveRequest(BaseModel):
 class EvaluateRequest(BaseModel):
     fen: str
     settings: Optional[EngineSettings] = None
+
+class AnalyzeMoveRequest(BaseModel):
+    fen_before: str
+    fen_after: str
+    settings: Optional[EngineSettings] = None

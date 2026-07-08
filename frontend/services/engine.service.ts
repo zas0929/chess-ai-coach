@@ -4,6 +4,8 @@ import {
   EngineEvaluateResponse,
   EngineMoveRequest,
   EngineMoveResponse,
+  EngineAnalyzeMoveRequest,
+  EngineAnalyzeMoveResponse,
 } from '@/types/engine';
 
 export const EngineService = {
@@ -24,6 +26,17 @@ export const EngineService = {
     return (
       await api.post<EngineEvaluateResponse>(
         '/engine/evaluate',
+        request,
+      )
+    ).data;
+  },
+
+  async analyzeMove(
+    request: EngineAnalyzeMoveRequest,
+  ): Promise<EngineAnalyzeMoveResponse> {
+    return (
+      await api.post<EngineAnalyzeMoveResponse>(
+        '/engine/analyze-move',
         request,
       )
     ).data;
