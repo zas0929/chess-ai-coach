@@ -1,8 +1,10 @@
 interface Props {
   values: number[];
   currentValue: number;
+  skillLevel?: number;
   depth?: number;
   time?: number;
+  moveTime?: number;
   engineName?: string;
 }
 
@@ -25,7 +27,9 @@ function formatEval(value: number) {
 export default function EvaluationGraph({
   values,
   currentValue,
+  skillLevel = 10,
   depth = 0,
+  moveTime = 500,
   time = 0,
   engineName = 'Stockfish',
 }: Props) {
@@ -187,12 +191,13 @@ export default function EvaluationGraph({
             </div>
           </div>
 
+          <Stat label="Skill Level" value={skillLevel || '—'} />
           <Stat label="Depth" value={depth || '—'} />
+          <Stat label="Move Time" value={`${moveTime || 0}ms`} />
           <Stat
             label="Time"
             value={`${time || 0}s`}
           />
-          <Stat label="Engine" value={engineName} />
         </div>
       </div>
     </div>

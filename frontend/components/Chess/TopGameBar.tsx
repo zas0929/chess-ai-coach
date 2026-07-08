@@ -3,11 +3,13 @@ interface Props {
   onChooseSide: (color: 'white' | 'black' | 'random') => void;
   onFlipBoard: () => void;
   onNewGame: () => void;
+  onUndo: () => void;
 }
 
 export default function TopGameBar({
   playerColor,
   onChooseSide,
+  onUndo,
   onFlipBoard,
   onNewGame,
 }: Props) {
@@ -53,6 +55,13 @@ export default function TopGameBar({
       </div>
 
       <div className="flex items-center gap-3">
+        <button
+          onClick={onUndo}
+          className={buttonClass}
+        >
+          Undo ↩
+        </button>
+
         <button
           onClick={onFlipBoard}
           className={buttonClass}

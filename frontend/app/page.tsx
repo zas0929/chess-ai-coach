@@ -3,8 +3,6 @@
 import ChessBoard from '@/components/Chess/ChessBoard';
 import EvaluationBar from '@/components/Chess/EvaluationBar';
 import MoveHistory from '@/components/Chess/MoveHistory';
-import ChessControls from '@/components/Chess/ChessControls';
-import ThinkingIndicator from '@/components/Chess/ThinkingIndicator';
 import { useChessGame } from '@/hooks/useChessGame';
 import CapturedPieces from '@/components/Chess/CapturedPieces';
 import GameStatus from '@/components/Chess/GameStatus';
@@ -19,7 +17,6 @@ export default function HomePage() {
     fen,
     moves,
     evaluation,
-    thinking,
     onDrop,
     newGame,
     undo,
@@ -97,6 +94,7 @@ export default function HomePage() {
             onChooseSide={chooseSide}
             onFlipBoard={flipBoard}
             onNewGame={newGame}
+            onUndo={undo}
           />
 
           <CapturedPieces {...bottomCaptured} />
@@ -123,24 +121,11 @@ export default function HomePage() {
             <EvaluationGraph
               values={evaluationHistory}
               currentValue={evaluation}
+              skillLevel={engineStats?.skill_level}
               depth={engineStats?.depth}
+              moveTime={moveTime}
               time={engineStats?.time}
               engineName="Stockfish"
-            />
-          </Panel>
-
-          <Panel>
-            <MoveHistory moves={moves} />
-          </Panel>
-
-          <Panel>
-            <ThinkingIndicator
-              stats={{
-                ...engineStats,
-                skill_level: skillLevel,
-                depth,
-                move_time: moveTime,
-              }}
             />
           </Panel>
 
@@ -155,21 +140,16 @@ export default function HomePage() {
             />
           </Panel>
 
+          <Panel>
+            <MoveHistory moves={moves} />
+          </Panel>
+
           <GameStatus
             status={gameStatus}
             winner={winner}
             onNewGame={newGame}
           />
 
-          <Panel>
-            <ChessControls
-              playerColor={playerColor}
-              onNewGame={newGame}
-              onUndo={undo}
-              onFlipBoard={flipBoard}
-              onChooseSide={chooseSide}
-            />
-          </Panel>
         </aside>
       </div>
     </AppShell>
