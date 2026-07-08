@@ -247,22 +247,6 @@ export function useChessGame() {
     ],
   );
 
-  const selectPiece = useCallback(
-  (square: Square) => {
-    const moves = game.moves({
-      square,
-      verbose: true,
-    });
-
-    setSelectedSquare(square);
-
-    setPossibleMoves(
-      moves.map((move) => move.to),
-    );
-  },
-  [game],
-  );
-
   const updateState = useCallback(() => {
     setFen(game.fen());
 
@@ -469,7 +453,57 @@ const chooseSide = useCallback(
     updateState,
     makeEngineMove,
   ],
-);
+  );
+  
+  const selectPiece = useCallback(
+    async (square: Square) => {
+        if (thinking || !isLivePosition) {
+          return;
+        }
+
+        if (selectedSquare) {
+          const moved = await onDrop(selectedSquare, square);
+
+          if (moved) {
+            setSelectedSquare(null);
+            setPossibleMoves([]);
+            return;
+          }
+        }
+
+        const piece = game.get(square);
+
+        if (!piece) {
+          setSelectedSquare(null);
+          setPossibleMoves([]);
+          return;
+        }
+
+        if (piece.color !== game.turn()) {
+          setSelectedSquare(null);
+          setPossibleMoves([]);
+          return;
+        }
+
+        const moves = game.moves({
+          square,
+          verbose: true,
+        });
+
+        setSelectedSquare(square);
+
+        setPossibleMoves(
+          moves.map((move) => move.to as Square),
+        );
+      },
+    [
+      game,
+      thinking,
+      isLivePosition,
+      selectedSquare,
+      onDrop,
+    ],
+  );
 
   const newGame = useCallback(() => {
     game.reset();
