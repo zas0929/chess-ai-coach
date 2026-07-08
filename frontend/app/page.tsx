@@ -13,6 +13,7 @@ import EngineSettings from '@/components/Chess/EngineSettings';
 import EvaluationGraph from '@/components/Chess/EvaluationGraph';
 import OpeningExplorerPreview from '@/components/Chess/OpeningExplorerPreview';
 import GameTimeline from '@/components/Chess/GameTimeline';
+import GameNavigation from '@/components/Chess/GameNavigation';
 
 export default function HomePage() {
   const {
@@ -43,10 +44,20 @@ export default function HomePage() {
     setMoveTime,
     setDepth,
     evaluationHistory,
+    displayedFen,
+    viewPly,
+    totalPly,
+    isLivePosition,
+    goToFirstMove,
+    goToPreviousMove,
+    goToNextMove,
+    goToLastMove,
   } = useChessGame();
 
-  const lastEvaluationPoint =
-    evaluationHistory[evaluationHistory.length - 1];
+  const selectedEvaluationPoint =
+    evaluationHistory.find(
+      (point) => point.ply === viewPly,
+    ) ?? evaluationHistory[evaluationHistory.length - 1];
   
   const topCaptured =
     boardOrientation === 'white'
@@ -111,7 +122,7 @@ export default function HomePage() {
 
           <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] shadow-2xl">
             <ChessBoard
-              position={fen}
+              position={displayedFen}
               boardOrientation={boardOrientation}
               onDrop={onDrop}
               lastMove={lastMove}
@@ -131,11 +142,23 @@ export default function HomePage() {
             <EvaluationGraph
               values={evaluationHistory}
               currentValue={evaluation}
-              lastPoint={lastEvaluationPoint}
+              lastPoint={selectedEvaluationPoint}
               depth={engineStats?.depth}
               time={engineStats?.time}
               moveTime={engineStats?.move_time ?? moveTime}
               skillLevel={engineStats?.skill_level ?? skillLevel}
+            />
+          </Panel>
+
+          <Panel>
+            <GameNavigation
+              currentPly={viewPly}
+              totalPly={totalPly}
+              isLive={isLivePosition}
+              onFirst={goToFirstMove}
+              onPrev={goToPreviousMove}
+              onNext={goToNextMove}
+              onLast={goToLastMove}
             />
           </Panel>
 

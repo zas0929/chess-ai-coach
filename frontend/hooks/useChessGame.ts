@@ -54,6 +54,8 @@ export function useChessGame() {
 
   const boardOrientation = playerColor;
 
+  const [viewPly, setViewPly] = useState(0);
+
   const [evaluationHistory, setEvaluationHistory] =
     useState<EvaluationPoint[]>([
       {
@@ -83,28 +85,68 @@ export function useChessGame() {
   const [moveTime, setMoveTime] = useState(500);
   const [depth, setDepth] = useState(12);
 
+  const getFenAtPly = useCallback(
+    (ply: number) => {
+      const replayGame = new Chess();
+      const history = game.history();
+
+      history.slice(0, ply).forEach((move) => {
+        replayGame.move(move);
+      });
+
+      return replayGame.fen();
+    },
+    [game],
+  );
+
+  const totalPly = moves.length;
+
+  const isLivePosition = viewPly === totalPly;
+
+  const displayedFen = isLivePosition
+    ? fen
+    : getFenAtPly(viewPly);
+  
+  const goToFirstMove = useCallback(() => {
+    setViewPly(0);
+  }, []);
+
+  const goToPreviousMove = useCallback(() => {
+    setViewPly((ply) => Math.max(0, ply - 1));
+  }, []);
+
+  const goToNextMove = useCallback(() => {
+    setViewPly((ply) =>
+      Math.min(game.history().length, ply + 1),
+    );
+  }, [game]);
+
+  const goToLastMove = useCallback(() => {
+    setViewPly(game.history().length);
+  }, [game]);
+
   const findKingSquare = useCallback(() => {
-  const turn = game.turn();
-  const board = game.board();
+    const turn = game.turn();
+    const board = game.board();
 
-  for (let rankIndex = 0; rankIndex < 8; rankIndex++) {
-    for (let fileIndex = 0; fileIndex < 8; fileIndex++) {
-      const piece = board[rankIndex][fileIndex];
+    for (let rankIndex = 0; rankIndex < 8; rankIndex++) {
+      for (let fileIndex = 0; fileIndex < 8; fileIndex++) {
+        const piece = board[rankIndex][fileIndex];
 
-      if (
-        piece &&
-        piece.type === 'k' &&
-        piece.color === turn
-      ) {
-        const file = String.fromCharCode(97 + fileIndex);
-        const rank = 8 - rankIndex;
+        if (
+          piece &&
+          piece.type === 'k' &&
+          piece.color === turn
+        ) {
+          const file = String.fromCharCode(97 + fileIndex);
+          const rank = 8 - rankIndex;
 
-        return `${file}${rank}`;
+          return `${file}${rank}`;
+        }
       }
     }
-  }
 
-  return null;
+    return null;
   }, [game]);
   
   const normalizeEvaluation = (
@@ -255,6 +297,8 @@ export function useChessGame() {
       setGameStatus('playing');
       setWinner(null);
     }
+
+    setViewPly(game.history().length);
   }, [game, findKingSquare]);
 
   const makeEngineMove = useCallback(
@@ -361,54 +405,57 @@ const chooseSide = useCallback(
   );
 
   const onDrop = useCallback(
-  async (
-    sourceSquare: Square,
-    targetSquare: Square,
-  ) => {
-    if (thinking) {
-      return false;
-    }
+    async (
+      sourceSquare: Square,
+      targetSquare: Square,
+      ) => {
+      if (!isLivePosition) {
+        return false;
+      }
+      if (thinking) {
+        return false;
+      }
 
-    const playerMove = game.move({
-      from: sourceSquare,
-      to: targetSquare,
-      promotion: 'q',
-    });
+      const playerMove = game.move({
+        from: sourceSquare,
+        to: targetSquare,
+        promotion: 'q',
+      });
 
-    if (!playerMove) {
-      return false;
-    }
+      if (!playerMove) {
+        return false;
+      }
 
-    setSelectedSquare(null);
-    setPossibleMoves([]);
+      setSelectedSquare(null);
+      setPossibleMoves([]);
 
-    setLastMove({
-      from: playerMove.from,
-      to: playerMove.to,
-    });
+      setLastMove({
+        from: playerMove.from,
+        to: playerMove.to,
+      });
 
-    if (game.isCheckmate()) {
-      SoundService.play('checkmate');
-    } else if (game.isCheck()) {
-      SoundService.play('check');
-    } else if (playerMove.captured) {
-      SoundService.play('capture');
-    } else {
-      SoundService.play('move');
-    }
+      if (game.isCheckmate()) {
+        SoundService.play('checkmate');
+      } else if (game.isCheck()) {
+        SoundService.play('check');
+      } else if (playerMove.captured) {
+        SoundService.play('capture');
+      } else {
+        SoundService.play('move');
+      }
 
-    updateState();
-      
-    await evaluateCurrentPosition();
+      updateState();
+        
+      await evaluateCurrentPosition();
 
-    if (game.isGameOver()) {
+      if (game.isGameOver()) {
+        return true;
+      }
+
+      await makeEngineMove();
+
       return true;
-    }
-
-    await makeEngineMove();
-
-    return true;
-  },
+    },
   [
     game,
     thinking,
@@ -509,6 +556,14 @@ const chooseSide = useCallback(
     setMoveTime,
     setDepth,
     evaluationHistory,
-    evaluateCurrentPosition
+    evaluateCurrentPosition,
+    displayedFen,
+    viewPly,
+    totalPly,
+    isLivePosition,
+    goToFirstMove,
+    goToPreviousMove,
+    goToNextMove,
+    goToLastMove,
   };
 }
