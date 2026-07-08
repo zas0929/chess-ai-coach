@@ -12,6 +12,7 @@ import AppShell from '@/components/Chess/AppShell';
 import TopGameBar from '@/components/Chess/TopGameBar';
 import Panel from '@/components/Chess/Panel';
 import EngineSettings from '@/components/Chess/EngineSettings';
+import EvaluationGraph from '@/components/Chess/EvaluationGraph';
 
 export default function HomePage() {
   const {
@@ -42,6 +43,7 @@ export default function HomePage() {
     setSkillLevel,
     setMoveTime,
     setDepth,
+    evaluationHistory,
   } = useChessGame();
 
   const topCaptured =
@@ -118,7 +120,13 @@ export default function HomePage() {
 
         <aside className="grid gap-4">
           <Panel>
-            <EvaluationBar value={evaluation} />
+            <EvaluationGraph
+              values={evaluationHistory}
+              currentValue={evaluation}
+              depth={engineStats?.depth}
+              time={engineStats?.time}
+              engineName="Stockfish"
+            />
           </Panel>
 
           <Panel>

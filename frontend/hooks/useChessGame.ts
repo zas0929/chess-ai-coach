@@ -52,6 +52,8 @@ export function useChessGame() {
 
   const boardOrientation = playerColor;
 
+  const [evaluationHistory, setEvaluationHistory] = useState<number[]>([0]);
+
   const [gameStatus, setGameStatus] =
     useState<'playing' | 'check' | 'checkmate' | 'draw' | 'stalemate'>(
       'playing',
@@ -197,6 +199,29 @@ export function useChessGame() {
           : -999,
       );
     }
+
+    if (response.evaluation.type === 'cp') {
+      const value = response.evaluation.value / 100;
+
+      setEvaluation(value);
+
+      setEvaluationHistory((history) => [
+        ...history,
+        value,
+      ]);
+    }
+
+    if (response.evaluation.type === 'mate') {
+      const value =
+        response.evaluation.value > 0 ? 999 : -999;
+
+      setEvaluation(value);
+
+      setEvaluationHistory((history) => [
+        ...history,
+        value,
+      ]);
+    }
   } catch (error) {
     console.error(error);
   } finally {
@@ -311,7 +336,9 @@ const chooseSide = useCallback(
     setIsCheckmate(false);
 
     setGameStatus('playing');
-    
+
+    setEvaluationHistory([0]);
+
     setWinner(null);
   }, [game, updateState]);
 
@@ -328,6 +355,12 @@ const chooseSide = useCallback(
     }
 
     updateState();
+
+    setEvaluationHistory((history) =>
+      history.length > 2
+        ? history.slice(0, -2)
+        : [0],
+    );
   }, [game, updateState]);
   
 
@@ -360,5 +393,6 @@ const chooseSide = useCallback(
     setSkillLevel,
     setMoveTime,
     setDepth,
+    evaluationHistory,
   };
 }
