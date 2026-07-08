@@ -113,10 +113,10 @@ export default function HomePage() {
             onUndo={undo}
           />
 
-          <div className="mb-4 grid grid-cols-2 gap-4">
+          {/* <div className="mb-4 grid grid-cols-2 gap-4">
             <OpeningExplorerPreview />
             <GameTimeline moveCount={moves.length} />
-          </div>
+          </div> */}
 
           <CapturedPieces {...bottomCaptured} />
 
