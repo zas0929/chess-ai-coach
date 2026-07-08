@@ -4,7 +4,6 @@ from stockfish import Stockfish
 
 from app.core.config import settings
 
-
 class StockfishService:
 
     def __init__(self):
@@ -64,8 +63,11 @@ class StockfishService:
 
         elapsed = time.time() - start_time
 
+        best_move = self.engine.get_best_move()
+
         return {
             "evaluation": evaluation,
+            "best_move": best_move,
             "stats": {
                 "time": round(elapsed, 3),
                 "skill_level": skill_level,

@@ -192,6 +192,7 @@ export function useChessGame() {
         value,
         move: lastMoveSan,
         source: 'player',
+        bestMove: response.best_move,
       });
 
       return value;

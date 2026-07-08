@@ -34,5 +34,6 @@ export interface EngineMoveResponse {
 
 export interface EngineEvaluateResponse {
   evaluation: Evaluation;
+  best_move?: string;
   stats?: EngineStats;
 }
