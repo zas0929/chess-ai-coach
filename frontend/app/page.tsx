@@ -45,6 +45,9 @@ export default function HomePage() {
     evaluationHistory,
   } = useChessGame();
 
+  const lastEvaluationPoint =
+    evaluationHistory[evaluationHistory.length - 1];
+  
   const topCaptured =
     boardOrientation === 'white'
       ? {
@@ -128,6 +131,7 @@ export default function HomePage() {
             <EvaluationGraph
               values={evaluationHistory}
               currentValue={evaluation}
+              lastPoint={lastEvaluationPoint}
               depth={engineStats?.depth}
               time={engineStats?.time}
               moveTime={engineStats?.move_time ?? moveTime}

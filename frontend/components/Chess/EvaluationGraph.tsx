@@ -19,6 +19,7 @@ interface Props {
   skillLevel?: number;
   previousValue?: number;
   evalChange?: number;
+  lastPoint?: EvaluationPoint;
 }
 
 const CHART_WIDTH = 260;
@@ -62,7 +63,7 @@ export default function EvaluationGraph({
   time = 0,
   moveTime = 0,
   skillLevel = 0,
-  previousValue = null,
+  lastPoint,
   evalChange = 0,
 }: Props) {
   const [hoveredIndex, setHoveredIndex] =
@@ -102,8 +103,6 @@ export default function EvaluationGraph({
     L 0 ${CHART_HEIGHT / 2}
     Z
   `;
-
-  const lastPoint = points[points.length - 1];
 
   const hoveredPoint =
     hoveredIndex !== null ? points[hoveredIndex] : null;
@@ -363,6 +362,83 @@ export default function EvaluationGraph({
         </div>
       </div>
 
+      {lastPoint && lastPoint.ply > 0 && (
+        <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.035] p-4">
+          <div className="mb-3 flex items-start justify-between gap-3">
+            <div>
+              <div className="text-xs uppercase tracking-widest text-zinc-500">
+                Last move
+              </div>
+
+              <div className="mt-1 text-lg font-semibold text-zinc-100">
+                {lastPoint.ply}. {lastPoint.move}
+              </div>
+            </div>
+
+            <div
+              className={[
+                'text-xl font-semibold',
+                lastPoint.value >= 0
+                  ? 'text-green-400'
+                  : 'text-red-400',
+              ].join(' ')}
+            >
+              {formatEval(lastPoint.value)}
+            </div>
+          </div>
+
+          <div className="mb-3">
+            <MoveBadge
+              classification={lastPoint.classification}
+              small
+            />
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 text-xs">
+            <MiniStat
+              label="Before"
+              value={
+                lastPoint.previousValue === null
+                  ? '—'
+                  : formatEval(lastPoint.previousValue)
+              }
+            />
+
+            <MiniStat
+              label="After"
+              value={formatEval(lastPoint.value)}
+              tone={
+                lastPoint.value >= 0
+                  ? 'positive'
+                  : 'negative'
+              }
+            />
+
+            <MiniStat
+              label="Change"
+              value={`${lastPoint.evalChange > 0 ? '+' : ''}${lastPoint.evalChange.toFixed(2)}`}
+              tone={
+                lastPoint.evalChange >= 0
+                  ? 'positive'
+                  : 'negative'
+              }
+            />
+          </div>
+
+          {lastPoint.bestMove && (
+            <div className="mt-3 rounded-xl bg-green-500/10 px-3 py-2 text-xs">
+              <span className="text-zinc-500">
+                Best:
+              </span>
+
+              <span className="ml-2 font-medium text-green-300">
+                {lastPoint.bestMove}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="mt-5 grid grid-cols-2 gap-4 border-t border-white/10 pt-4">
         <Stat label="Skill Level" value={skillLevel || '—'} />
         <Stat label="Depth" value={depth || '—'} />
@@ -387,6 +463,37 @@ function Stat({
     <div>
       <div className="text-sm text-zinc-500">{label}</div>
       <div className="mt-1 text-lg text-zinc-100">{value}</div>
+    </div>
+  );
+}
+
+function MiniStat({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone?: 'positive' | 'negative';
+}) {
+  return (
+    <div className="rounded-xl bg-white/[0.04] px-3 py-2">
+      <div className="text-[11px] text-zinc-500">
+        {label}
+      </div>
+
+      <div
+        className={[
+          'mt-1 font-medium',
+          tone === 'positive'
+            ? 'text-green-400'
+            : tone === 'negative'
+              ? 'text-red-400'
+              : 'text-zinc-200',
+        ].join(' ')}
+      >
+        {value}
+      </div>
     </div>
   );
 }
