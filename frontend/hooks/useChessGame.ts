@@ -88,7 +88,46 @@ export function useChessGame() {
   }
 
   return null;
-}, [game]);
+  }, [game]);
+  
+  const normalizeEvaluation = (
+    responseEvaluation: {
+      type: 'cp' | 'mate';
+      value: number;
+    },
+  ) => {
+    if (responseEvaluation.type === 'cp') {
+      return responseEvaluation.value / 100;
+    }
+
+    return responseEvaluation.value > 0 ? 999 : -999;
+  };
+
+  const evaluateCurrentPosition = useCallback(async () => {
+    const response = await EngineService.evaluate({
+      fen: game.fen(),
+      settings: {
+        skill_level: skillLevel,
+        move_time: moveTime,
+        depth,
+      },
+    });
+
+    if (response.stats) {
+      setEngineStats(response.stats);
+    }
+
+    const value = normalizeEvaluation(response.evaluation);
+
+    setEvaluation(value);
+
+    setEvaluationHistory((history) => [
+      ...history,
+      value,
+    ]);
+
+    return value;
+  }, [game, skillLevel, moveTime, depth]);
 
   const selectPiece = useCallback(
   (square: Square) => {
@@ -305,6 +344,8 @@ const chooseSide = useCallback(
     }
 
     updateState();
+      
+    await evaluateCurrentPosition();
 
     if (game.isGameOver()) {
       return true;
@@ -394,5 +435,6 @@ const chooseSide = useCallback(
     setMoveTime,
     setDepth,
     evaluationHistory,
+    evaluateCurrentPosition
   };
 }

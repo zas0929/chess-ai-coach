@@ -12,3 +12,8 @@ class EngineSettings(BaseModel):
 class MoveRequest(BaseModel):
     fen: str
     settings: Optional[EngineSettings] = None
+
+
+class EvaluateRequest(BaseModel):
+    fen: str
+    settings: Optional[EngineSettings] = None

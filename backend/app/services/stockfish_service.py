@@ -46,5 +46,31 @@ class StockfishService:
             }
         }
 
+    def evaluate(self, fen: str, engine_settings=None):
+        start_time = time.time()
+
+        skill_level = 10
+        depth = 12
+
+        if engine_settings:
+            skill_level = engine_settings.skill_level
+            depth = engine_settings.depth
+
+        self.engine.set_skill_level(skill_level)
+        self.engine.set_depth(depth)
+        self.engine.set_fen_position(fen)
+
+        evaluation = self.engine.get_evaluation()
+
+        elapsed = time.time() - start_time
+
+        return {
+            "evaluation": evaluation,
+            "stats": {
+                "time": round(elapsed, 3),
+                "skill_level": skill_level,
+                "depth": depth,
+            }
+        }
 
 stockfish_service = StockfishService()

@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.models.engine import MoveRequest
+from app.models.engine import MoveRequest, EvaluateRequest
 from app.services.stockfish_service import stockfish_service
 
 router = APIRouter()
@@ -9,6 +9,14 @@ router = APIRouter()
 @router.post("/move")
 def move(data: MoveRequest):
     return stockfish_service.best_move(
+        data.fen,
+        data.settings,
+    )
+
+
+@router.post("/evaluate")
+def evaluate(data: EvaluateRequest):
+    return stockfish_service.evaluate(
         data.fen,
         data.settings,
     )
