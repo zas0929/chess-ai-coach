@@ -11,6 +11,8 @@ import TopGameBar from '@/components/Chess/TopGameBar';
 import Panel from '@/components/Chess/Panel';
 import EngineSettings from '@/components/Chess/EngineSettings';
 import EvaluationGraph from '@/components/Chess/EvaluationGraph';
+import OpeningExplorerPreview from '@/components/Chess/OpeningExplorerPreview';
+import GameTimeline from '@/components/Chess/GameTimeline';
 
 export default function HomePage() {
   const {
@@ -97,6 +99,11 @@ export default function HomePage() {
             onUndo={undo}
           />
 
+          <div className="mb-4 grid grid-cols-2 gap-4">
+            <OpeningExplorerPreview />
+            <GameTimeline moveCount={moves.length} />
+          </div>
+
           <CapturedPieces {...bottomCaptured} />
 
           <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] shadow-2xl">
@@ -121,11 +128,10 @@ export default function HomePage() {
             <EvaluationGraph
               values={evaluationHistory}
               currentValue={evaluation}
-              skillLevel={engineStats?.skill_level}
               depth={engineStats?.depth}
-              moveTime={moveTime}
               time={engineStats?.time}
-              engineName="Stockfish"
+              moveTime={engineStats?.move_time ?? moveTime}
+              skillLevel={engineStats?.skill_level ?? skillLevel}
             />
           </Panel>
 

@@ -5,6 +5,8 @@ import { EngineService } from '@/services/engine.service';
 import { SoundService } from '@/services/sound.service';
 import { ToastService } from '@/services/toast.service';
 import { getMaterialState } from '@/utils/material';
+import { EvaluationPoint } from '@/types/evaluation';
+import { classifyMoveByEvalDrop } from '@/utils/classifyMove';
 
 export function useChessGame() {
   // Один экземпляр игры на весь жизненный цикл компонента
@@ -52,7 +54,16 @@ export function useChessGame() {
 
   const boardOrientation = playerColor;
 
-  const [evaluationHistory, setEvaluationHistory] = useState<number[]>([0]);
+  const [evaluationHistory, setEvaluationHistory] =
+    useState<EvaluationPoint[]>([
+      {
+        ply: 0,
+        fen: game.fen(),
+        move: 'start',
+        value: 0,
+        source: 'engine',
+      },
+    ]);
 
   const [gameStatus, setGameStatus] =
     useState<'playing' | 'check' | 'checkmate' | 'draw' | 'stalemate'>(
@@ -121,10 +132,26 @@ export function useChessGame() {
 
     setEvaluation(value);
 
-    setEvaluationHistory((history) => [
-      ...history,
-      value,
-    ]);
+    setEvaluationHistory((history) => {
+      const previousValue =
+        history.at(-1)?.value ?? 0;
+
+      return [
+        ...history,
+        {
+          ply: game.history().length,
+          fen: game.fen(),
+          move: game.history().at(-1) ?? '',
+          value,
+          source: 'player',
+          classification: classifyMoveByEvalDrop(
+            previousValue,
+            value,
+            'player',
+          ),
+        },
+      ];
+    });
 
     return value;
   }, [game, skillLevel, moveTime, depth]);
@@ -244,10 +271,26 @@ export function useChessGame() {
 
       setEvaluation(value);
 
-      setEvaluationHistory((history) => [
-        ...history,
-        value,
-      ]);
+      setEvaluationHistory((history) => {
+        const previousValue =
+          history.at(-1)?.value ?? 0;
+
+        return [
+          ...history,
+          {
+            ply: game.history().length,
+            fen: game.fen(),
+            move: aiMove?.san ?? response.move,
+            value,
+            source: 'engine',
+            classification: classifyMoveByEvalDrop(
+              previousValue,
+              value,
+              'engine',
+            ),
+          },
+        ];
+      });
     }
 
     if (response.evaluation.type === 'mate') {
@@ -256,10 +299,26 @@ export function useChessGame() {
 
       setEvaluation(value);
 
-      setEvaluationHistory((history) => [
-        ...history,
-        value,
-      ]);
+      setEvaluationHistory((history) => {
+        const previousValue =
+          history.at(-1)?.value ?? 0;
+
+        return [
+          ...history,
+          {
+            ply: game.history().length,
+            fen: game.fen(),
+            move: aiMove?.san ?? response.move,
+            value,
+            source: 'engine',
+            classification: classifyMoveByEvalDrop(
+              previousValue,
+              value,
+              'engine',
+            ),
+          },
+        ];
+      });
     }
   } catch (error) {
     console.error(error);
@@ -378,7 +437,15 @@ const chooseSide = useCallback(
 
     setGameStatus('playing');
 
-    setEvaluationHistory([0]);
+    setEvaluationHistory([
+      {
+        ply: 0,
+        fen: game.fen(),
+        move: 'start',
+        value: 0,
+        source: 'engine',
+      },
+    ]);
 
     setWinner(null);
   }, [game, updateState]);

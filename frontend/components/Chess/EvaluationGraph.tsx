@@ -1,18 +1,26 @@
+'use client';
+
+import { useMemo, useState } from 'react';
+
+import { EvaluationPoint } from '@/types/evaluation';
 interface Props {
-  values: number[];
+  values: EvaluationPoint[];
   currentValue: number;
-  skillLevel?: number;
   depth?: number;
   time?: number;
   moveTime?: number;
-  engineName?: string;
+  skillLevel?: number;
 }
 
-const CHART_WIDTH = 360;
-const CHART_HEIGHT = 160;
-const MAX_EVAL = 10;
+const CHART_WIDTH = 260;
+const CHART_HEIGHT = 120;
+const MAX_EVAL = 5;
 
 function clamp(value: number) {
+  if (Math.abs(value) >= 900) {
+    return value > 0 ? MAX_EVAL : -MAX_EVAL;
+  }
+
   return Math.max(-MAX_EVAL, Math.min(MAX_EVAL, value));
 }
 
@@ -24,32 +32,60 @@ function formatEval(value: number) {
   return `${value > 0 ? '+' : ''}${value.toFixed(2)}`;
 }
 
+function classifyMove(value: number) {
+  const abs = Math.abs(value);
+
+  if (abs >= 3) return 'Critical';
+  if (abs >= 1.5) return 'Advantage';
+  if (abs >= 0.5) return 'Slight edge';
+
+  return 'Equal';
+}
+
+function formatClassification(
+  classification?: string,
+) {
+  if (!classification) return 'Position';
+
+  return classification
+    .replace('-', ' ')
+    .replace(/\b\w/g, (char) =>
+      char.toUpperCase(),
+    );
+}
+
 export default function EvaluationGraph({
   values,
   currentValue,
-  skillLevel = 10,
   depth = 0,
-  moveTime = 500,
   time = 0,
-  engineName = 'Stockfish',
+  moveTime = 0,
+  skillLevel = 0,
 }: Props) {
+  const [hoveredIndex, setHoveredIndex] =
+    useState<number | null>(null);
+
   const normalizedValues =
-    values.length > 0 ? values : [0];
+    values.length > 0
+      ? values
+      : [{ ply: 0, fen: '', move: 'start', value: 0, source: 'engine' as const }];
 
-  const points = normalizedValues.map((value, index) => {
-    const x =
-      normalizedValues.length === 1
-        ? 0
-        : (index / (normalizedValues.length - 1)) *
-          CHART_WIDTH;
+      const points = useMemo(
+        () =>
+          normalizedValues.map((point, index) => {
+      const x =
+        normalizedValues.length === 1
+          ? 0
+          : (index / (normalizedValues.length - 1)) * CHART_WIDTH;
 
-    const y =
-      CHART_HEIGHT / 2 -
-      (clamp(value) / MAX_EVAL) *
-        (CHART_HEIGHT / 2);
+      const y =
+        CHART_HEIGHT / 2 -
+        (clamp(point.value) / MAX_EVAL) * (CHART_HEIGHT / 2);
 
-    return { x, y, value };
-  });
+      return { x, y, ...point, index };
+    }),
+    [normalizedValues],
+  );
 
   const linePath = points
     .map((point, index) =>
@@ -57,7 +93,7 @@ export default function EvaluationGraph({
     )
     .join(' ');
 
-  const greenAreaPath = `
+  const areaPath = `
     ${linePath}
     L ${CHART_WIDTH} ${CHART_HEIGHT / 2}
     L 0 ${CHART_HEIGHT / 2}
@@ -66,139 +102,210 @@ export default function EvaluationGraph({
 
   const lastPoint = points[points.length - 1];
 
+  const hoveredPoint =
+    hoveredIndex !== null ? points[hoveredIndex] : null;
+
+  const activePoint = hoveredPoint ?? lastPoint;
+
+  const isWhiteBetter = currentValue > 0;
+  const isBlackBetter = currentValue < 0;
+
+  const handleMouseMove = (
+    event: React.MouseEvent<SVGSVGElement>,
+  ) => {
+    const rect =
+      event.currentTarget.getBoundingClientRect();
+
+    const x =
+      ((event.clientX - rect.left) / rect.width) *
+      CHART_WIDTH;
+
+    const nearestIndex = Math.round(
+      (x / CHART_WIDTH) *
+        (normalizedValues.length - 1),
+    );
+
+    setHoveredIndex(
+      Math.max(
+        0,
+        Math.min(
+          normalizedValues.length - 1,
+          nearestIndex,
+        ),
+      ),
+    );
+  };
+
   return (
     <div>
-      <div className="mb-5 flex items-center justify-between">
+      <div className="mb-3 flex items-start justify-between">
         <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-300">
-          Evaluation
+          Evaluation Graph
         </h2>
 
         <div
           className={[
-            'text-4xl font-semibold',
-            currentValue >= 0
+            'text-4xl font-semibold leading-none',
+            isWhiteBetter
               ? 'text-green-400'
-              : 'text-red-400',
+              : isBlackBetter
+                ? 'text-red-400'
+                : 'text-zinc-200',
           ].join(' ')}
         >
           {formatEval(currentValue)}
         </div>
       </div>
 
-      <div className="grid grid-cols-[1fr_130px] gap-5">
-        <div className="relative">
-          <svg
-            viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
-            className="h-44 w-full overflow-visible"
-          >
-            <defs>
-              <linearGradient
-                id="greenArea"
-                x1="0"
-                y1="0"
-                x2="0"
-                y2="1"
-              >
-                <stop
-                  offset="0%"
-                  stopColor="rgba(74,222,128,0.45)"
-                />
-                <stop
-                  offset="100%"
-                  stopColor="rgba(74,222,128,0.05)"
-                />
-              </linearGradient>
-            </defs>
+      <div className="mb-4 text-right text-sm text-zinc-300">
+        {isWhiteBetter
+          ? 'White is better'
+          : isBlackBetter
+            ? 'Black is better'
+            : 'Equal'}
+      </div>
 
-            {[0, 0.25, 0.5, 0.75, 1].map((ratio) => (
-              <line
-                key={`h-${ratio}`}
-                x1={0}
-                x2={CHART_WIDTH}
-                y1={ratio * CHART_HEIGHT}
-                y2={ratio * CHART_HEIGHT}
-                stroke="rgba(255,255,255,0.08)"
-                strokeDasharray="4 6"
+      <div className="relative">
+        <svg
+          viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
+          className="h-36 w-full overflow-visible"
+          onMouseMove={handleMouseMove}
+          onMouseLeave={() => setHoveredIndex(null)}
+        >
+          <defs>
+            <linearGradient
+              id="evalGreenArea"
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="1"
+            >
+              <stop
+                offset="0%"
+                stopColor="rgba(74,222,128,0.42)"
               />
-            ))}
-
-            {[0, 0.25, 0.5, 0.75, 1].map((ratio) => (
-              <line
-                key={`v-${ratio}`}
-                y1={0}
-                y2={CHART_HEIGHT}
-                x1={ratio * CHART_WIDTH}
-                x2={ratio * CHART_WIDTH}
-                stroke="rgba(255,255,255,0.08)"
-                strokeDasharray="4 6"
+              <stop
+                offset="100%"
+                stopColor="rgba(74,222,128,0.04)"
               />
-            ))}
+            </linearGradient>
+          </defs>
 
+          {[0, 0.25, 0.5, 0.75, 1].map((ratio) => (
             <line
+              key={`h-${ratio}`}
               x1={0}
               x2={CHART_WIDTH}
-              y1={CHART_HEIGHT / 2}
-              y2={CHART_HEIGHT / 2}
-              stroke="rgba(255,255,255,0.35)"
+              y1={ratio * CHART_HEIGHT}
+              y2={ratio * CHART_HEIGHT}
+              stroke="rgba(255,255,255,0.08)"
+              strokeDasharray="3 5"
             />
+          ))}
 
-            <path
-              d={greenAreaPath}
-              fill="url(#greenArea)"
+          {[0, 0.5, 1].map((ratio) => (
+            <line
+              key={`v-${ratio}`}
+              y1={0}
+              y2={CHART_HEIGHT}
+              x1={ratio * CHART_WIDTH}
+              x2={ratio * CHART_WIDTH}
+              stroke="rgba(255,255,255,0.08)"
+              strokeDasharray="3 5"
             />
+          ))}
 
-            <path
-              d={linePath}
-              fill="none"
-              stroke={
-                currentValue >= 0
-                  ? '#66d94f'
-                  : '#ef4444'
-              }
-              strokeWidth={3}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-
-            <circle
-              cx={lastPoint.x}
-              cy={lastPoint.y}
-              r={5}
-              fill="#0b1118"
-              stroke="white"
-              strokeWidth={3}
-            />
-          </svg>
-
-          <div className="mt-2 flex justify-between text-xs text-zinc-500">
-            <span>0</span>
-            <span>Move number</span>
-            <span>{normalizedValues.length}</span>
-          </div>
-        </div>
-
-        <div className="space-y-4 border-l border-white/10 pl-5">
-          <div>
-            <div className="text-sm text-zinc-500">
-              Advantage
-            </div>
-            <div className="mt-1 text-sm text-zinc-300">
-              {currentValue > 0
-                ? 'White is better'
-                : currentValue < 0
-                  ? 'Black is better'
-                  : 'Equal'}
-            </div>
-          </div>
-
-          <Stat label="Skill Level" value={skillLevel || '—'} />
-          <Stat label="Depth" value={depth || '—'} />
-          <Stat label="Move Time" value={`${moveTime || 0}ms`} />
-          <Stat
-            label="Time"
-            value={`${time || 0}s`}
+          <line
+            x1={0}
+            x2={CHART_WIDTH}
+            y1={CHART_HEIGHT / 2}
+            y2={CHART_HEIGHT / 2}
+            stroke="rgba(255,255,255,0.35)"
           />
+
+          <path d={areaPath} fill="url(#evalGreenArea)" />
+
+          <path
+            d={linePath}
+            fill="none"
+            stroke={currentValue >= 0 ? '#4ade80' : '#ef4444'}
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+
+          {activePoint && (
+            <>
+              <line
+                x1={activePoint.x}
+                x2={activePoint.x}
+                y1={0}
+                y2={CHART_HEIGHT}
+                stroke="rgba(255,255,255,0.45)"
+              />
+
+              <circle
+                cx={activePoint.x}
+                cy={activePoint.y}
+                r={4}
+                fill="#0b1118"
+                stroke="white"
+                strokeWidth={2.5}
+              />
+            </>
+          )}
+        </svg>
+
+        {hoveredPoint && (
+          <div
+            className="pointer-events-none absolute top-6 z-20 w-44 rounded-2xl border border-white/10 bg-[#0b1118]/95 p-3 text-sm shadow-2xl"
+            style={{
+              left: `min(calc(${(hoveredPoint.x / CHART_WIDTH) * 100}% + 10px), calc(100% - 176px))`,
+            }}
+          >
+            <div className="mb-1 flex justify-between gap-3">
+              <span className="text-zinc-300">
+                {hoveredPoint.ply}. {hoveredPoint.move}
+              </span>
+
+              <span className={hoveredPoint.value >= 0 ? 'text-green-400' : 'text-red-400'}>
+                {formatEval(hoveredPoint.value)}
+              </span>
+            </div>
+
+            <div className="text-xs text-zinc-500">
+              {classifyMove(hoveredPoint.value)}
+            </div>
+
+            <div className="mt-2 text-xs text-zinc-400">
+              Positive values favor White.
+              <br />
+              Negative values favor Black.
+            </div>
+
+            <div className="mt-2 inline-flex rounded-lg bg-white/10 px-2 py-1 text-xs text-zinc-200">
+              {formatClassification(
+                hoveredPoint.classification,
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="mt-1 flex justify-between text-xs text-zinc-500">
+          <span>0</span>
+          <span>Move number</span>
+          <span>{normalizedValues.length}</span>
         </div>
+      </div>
+
+      <div className="mt-5 grid grid-cols-2 gap-4 border-t border-white/10 pt-4">
+        <Stat label="Skill Level" value={skillLevel || '—'} />
+        <Stat label="Depth" value={depth || '—'} />
+        <Stat
+          label="Move Time"
+          value={moveTime ? `${moveTime}ms` : '—'}
+        />
+        <Stat label="Time" value={`${time || 0}s`} />
       </div>
     </div>
   );
@@ -208,17 +315,13 @@ function Stat({
   label,
   value,
 }: {
-  label: string | number;
+  label: string;
   value: string | number;
 }) {
   return (
-    <div className="border-t border-white/10 pt-3">
-      <div className="text-sm text-zinc-500">
-        {label}
-      </div>
-      <div className="mt-1 text-lg text-zinc-100">
-        {value}
-      </div>
+    <div>
+      <div className="text-sm text-zinc-500">{label}</div>
+      <div className="mt-1 text-lg text-zinc-100">{value}</div>
     </div>
   );
 }
