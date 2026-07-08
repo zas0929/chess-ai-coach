@@ -63,8 +63,13 @@ export function useChessGame() {
         value: 0,
         previousValue: null,
         source: 'engine',
+        evalChange: 0,
+        bestMove: undefined,
       }
     ]);
+  
+  const getLast = <T>(items: T[]): T | undefined =>
+    items[items.length - 1];
 
   const [gameStatus, setGameStatus] =
     useState<'playing' | 'check' | 'checkmate' | 'draw' | 'stalemate'>(
@@ -115,47 +120,90 @@ export function useChessGame() {
     return responseEvaluation.value > 0 ? 999 : -999;
   };
 
-  const evaluateCurrentPosition = useCallback(async () => {
-    const response = await EngineService.evaluate({
-      fen: game.fen(),
-      settings: {
-        skill_level: skillLevel,
-        move_time: moveTime,
-        depth,
-      },
-    });
+  const appendEvaluationPoint = useCallback(
+    ({
+      value,
+      move,
+      source,
+      bestMove,
+    }: {
+      value: number;
+      move: string;
+      source: 'player' | 'engine';
+      bestMove?: string;
+    }) => {
+      setEvaluation(value);
 
-    if (response.stats) {
-      setEngineStats(response.stats);
-    }
+      setEvaluationHistory((history) => {
+        const previousPoint = getLast(history);
+        const previousValue =
+          previousPoint?.value ?? 0;
 
-    const value = normalizeEvaluation(response.evaluation);
+        const evalChange =
+          value - previousValue;
 
-    setEvaluation(value);
-
-    setEvaluationHistory((history) => {
-      const previousValue = history.at(-1)?.value ?? 0;
-
-      return [
-        ...history,
-        {
-          ply: game.history().length,
-          fen: game.fen(),
-          move: game.history().at(-1) ?? '',
-          value,
-          previousValue,
-          source: 'player',
-          classification: classifyMoveByEvalDrop(
-            previousValue,
+        return [
+          ...history,
+          {
+            ply: game.history().length,
+            fen: game.fen(),
+            move,
             value,
-            'player',
-          ),
-        },
-      ];
-    });
+            previousValue,
+            evalChange,
+            bestMove,
+            source,
+            classification:
+              classifyMoveByEvalDrop(
+                previousValue,
+                value,
+                source,
+              ),
+          },
+        ];
+      });
+    },
+    [game],
+  );
 
-    return value;
-  }, [game, skillLevel, moveTime, depth]);
+  const evaluateCurrentPosition = useCallback(
+    async () => {
+      const response = await EngineService.evaluate({
+        fen: game.fen(),
+        settings: {
+          skill_level: skillLevel,
+          move_time: moveTime,
+          depth,
+        },
+      });
+
+      if (response.stats) {
+        setEngineStats(response.stats);
+      }
+
+      const value =
+        normalizeEvaluation(response.evaluation);
+
+      const history = game.history();
+      const lastMoveSan =
+        history[history.length - 1] ?? '';
+
+      appendEvaluationPoint({
+        value,
+        move: lastMoveSan,
+        source: 'player',
+      });
+
+      return value;
+    },
+    [
+      game,
+      skillLevel,
+      moveTime,
+      depth,
+      appendEvaluationPoint,
+    ],
+  );
 
   const selectPiece = useCallback(
   (square: Square) => {
@@ -208,131 +256,76 @@ export function useChessGame() {
     }
   }, [game, findKingSquare]);
 
-  const makeEngineMove = useCallback(async () => {
-  setThinking(true);
+  const makeEngineMove = useCallback(
+    async () => {
+      setThinking(true);
 
-  try {
-    const request = {
-      fen: game.fen(),
-      settings: {
-        skill_level: skillLevel,
-        move_time: moveTime,
-        depth,
-      },
-    };
+      try {
+        const response =
+          await EngineService.getBestMove({
+            fen: game.fen(),
+            settings: {
+              skill_level: skillLevel,
+              move_time: moveTime,
+              depth,
+            },
+          });
 
-    const response =
-      await EngineService.getBestMove(request);
+        if (response.stats) {
+          setEngineStats(response.stats);
+        }
 
-    if (response.stats) {
-      setEngineStats(response.stats);
-    }
+        if (!response.move) {
+          return;
+        }
 
-    if (!response.move) {
-      return;
-    }
+        const aiMove = game.move(response.move);
 
-    const aiMove = game.move(response.move);
+        if (!aiMove) {
+          return;
+        }
 
-    if (aiMove) {
-      setLastMove({
-        from: aiMove.from,
-        to: aiMove.to,
-      });
+        setLastMove({
+          from: aiMove.from,
+          to: aiMove.to,
+        });
 
-      if (game.isCheckmate()) {
-        SoundService.play('checkmate');
-      } else if (game.isCheck()) {
-        SoundService.play('check');
-      } else if (aiMove.captured) {
-        SoundService.play('capture');
-      } else {
-        SoundService.play('move');
+        if (game.isCheckmate()) {
+          SoundService.play('checkmate');
+        } else if (game.isCheck()) {
+          SoundService.play('check');
+        } else if (aiMove.captured) {
+          SoundService.play('capture');
+        } else {
+          SoundService.play('move');
+        }
+
+        updateState();
+
+        const value =
+          normalizeEvaluation(response.evaluation);
+
+        appendEvaluationPoint({
+          value,
+          move: aiMove.san,
+          source: 'engine',
+          bestMove: response.move,
+        });
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setThinking(false);
       }
-
-      updateState();
-    }
-
-    if (response.evaluation.type === 'cp') {
-      setEvaluation(
-        response.evaluation.value / 100,
-      );
-    }
-
-    if (response.evaluation.type === 'mate') {
-      setEvaluation(
-        response.evaluation.value > 0
-          ? 999
-          : -999,
-      );
-    }
-
-    if (response.evaluation.type === 'cp') {
-      const value = response.evaluation.value / 100;
-
-      setEvaluation(value);
-
-      setEvaluationHistory((history) => {
-        const previousValue = history.at(-1)?.value ?? 0;
-
-        return [
-          ...history,
-          {
-            ply: game.history().length,
-            fen: game.fen(),
-            move: aiMove?.san ?? response.move,
-            value,
-            previousValue,
-            source: 'engine',
-            classification: classifyMoveByEvalDrop(
-              previousValue,
-              value,
-              'engine',
-            ),
-          },
-        ];
-      });
-    }
-
-    if (response.evaluation.type === 'mate') {
-      const value =
-        response.evaluation.value > 0 ? 999 : -999;
-
-      setEvaluation(value);
-
-      setEvaluationHistory((history) => {
-        const previousValue =
-          history.at(-1)?.value ?? 0;
-
-        return [
-          ...history,
-          {
-            ply: game.history().length,
-            fen: game.fen(),
-            move: aiMove?.san ?? response.move,
-            value,
-            source: 'engine',
-            classification: classifyMoveByEvalDrop(
-              previousValue,
-              value,
-              'engine',
-            ),
-          },
-        ];
-      });
-    }
-  } catch (error) {
-    console.error(error);
-  } finally {
-    setThinking(false);
-  }
-}, [
-  game,
-  updateState,
-  skillLevel,
-  moveTime,
-  depth,
-]);
+    },
+    [
+      game,
+      skillLevel,
+      moveTime,
+      depth,
+      updateState,
+      appendEvaluationPoint,
+    ],
+  );
 
   const flipBoard = useCallback(() => {
   setPlayerColor((color) =>
@@ -446,6 +439,8 @@ const chooseSide = useCallback(
         value: 0,
         previousValue: null,
         source: 'engine',
+        evalChange: 0,
+        bestMove: undefined,
       },
     ]);
 
@@ -469,7 +464,16 @@ const chooseSide = useCallback(
     setEvaluationHistory((history) =>
       history.length > 2
         ? history.slice(0, -2)
-        : [0],
+        : [{
+          ply: 0,
+          fen: game.fen(),
+          move: 'start',
+          value: 0,
+          previousValue: null,
+          source: 'engine',
+          evalChange: 0,
+          bestMove: undefined,
+        }],
     );
   }, [game, updateState]);
   

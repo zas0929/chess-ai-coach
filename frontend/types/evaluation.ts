@@ -14,6 +14,8 @@ export interface EvaluationPoint {
   move: string;
   value: number;
   previousValue: number | null;
+  evalChange: number;
+  bestMove?: string;
   source: EvaluationSource;
   classification?: MoveClassification;
 }

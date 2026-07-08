@@ -12,6 +12,7 @@ interface Props {
   moveTime?: number;
   skillLevel?: number;
   previousValue?: number;
+  evalChange?: number;
 }
 
 const CHART_WIDTH = 260;
@@ -64,6 +65,7 @@ export default function EvaluationGraph({
   moveTime = 0,
   skillLevel = 0,
   previousValue = null,
+  evalChange = 0,
 }: Props) {
   const [hoveredIndex, setHoveredIndex] =
     useState<number | null>(null);
@@ -288,6 +290,25 @@ export default function EvaluationGraph({
             />
 
             <div className="mt-3 text-sm text-zinc-400">
+              {hoveredPoint.evalChange > 0
+                ? 'Evaluation improved.'
+                : hoveredPoint.evalChange < 0
+                  ? 'Evaluation dropped.'
+                  : 'Evaluation stayed equal.'}
+            </div>
+
+            {hoveredPoint.bestMove && (
+              <div className="mt-3 rounded-xl bg-white/[0.04] p-3 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-zinc-500">Best:</span>
+                  <span className="font-medium text-green-400">
+                    {hoveredPoint.bestMove}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-3 text-sm text-zinc-400">
               {hoveredPoint.value > 0
                 ? 'White is better'
                 : hoveredPoint.value < 0
@@ -296,6 +317,19 @@ export default function EvaluationGraph({
             </div>
 
             <div className="mt-3 rounded-xl bg-white/[0.04] p-3 text-xs text-zinc-400">
+              <div className="mt-1 flex justify-between">
+                <span>Change:</span>
+                <span
+                  className={
+                    hoveredPoint.evalChange >= 0
+                      ? 'text-green-400'
+                      : 'text-red-400'
+                  }
+                >
+                  {hoveredPoint.evalChange > 0 ? '+' : ''}
+                  {hoveredPoint.evalChange.toFixed(2)}
+                </span>
+              </div>
               <div className="flex justify-between">
                 <span>Before:</span>
                 <span>
