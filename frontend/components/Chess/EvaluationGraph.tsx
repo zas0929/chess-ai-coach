@@ -11,6 +11,7 @@ interface Props {
   time?: number;
   moveTime?: number;
   skillLevel?: number;
+  previousValue?: number;
 }
 
 const CHART_WIDTH = 260;
@@ -62,6 +63,7 @@ export default function EvaluationGraph({
   time = 0,
   moveTime = 0,
   skillLevel = 0,
+  previousValue = null,
 }: Props) {
   const [hoveredIndex, setHoveredIndex] =
     useState<number | null>(null);
@@ -259,35 +261,63 @@ export default function EvaluationGraph({
 
         {hoveredPoint && (
           <div
-            className="pointer-events-none absolute top-6 z-20 w-44 rounded-2xl border border-white/10 bg-[#0b1118]/95 p-3 text-sm shadow-2xl"
+            className="pointer-events-none absolute top-6 z-20 w-56 rounded-2xl border border-white/10 bg-[#0b1118]/95 p-4 text-sm shadow-2xl"
             style={{
-              left: `min(calc(${(hoveredPoint.x / CHART_WIDTH) * 100}% + 10px), calc(100% - 176px))`,
+              left: `min(calc(${(hoveredPoint.x / CHART_WIDTH) * 100}% + 10px), calc(100% - 224px))`,
             }}
           >
-            <div className="mb-1 flex justify-between gap-3">
-              <span className="text-zinc-300">
-                {hoveredPoint.ply}. {hoveredPoint.move}
-              </span>
+            <div className="mb-3 flex items-start justify-between gap-3">
+              <div className="font-medium text-zinc-100">
+                Move {hoveredPoint.ply}. {hoveredPoint.move}
+              </div>
 
-              <span className={hoveredPoint.value >= 0 ? 'text-green-400' : 'text-red-400'}>
+              <div
+                className={
+                  hoveredPoint.value >= 0
+                    ? 'font-semibold text-green-400'
+                    : 'font-semibold text-red-400'
+                }
+              >
                 {formatEval(hoveredPoint.value)}
-              </span>
-            </div>
-
-            <div className="text-xs text-zinc-500">
-              {classifyMove(hoveredPoint.value)}
-            </div>
-
-            <div className="mt-2 text-xs text-zinc-400">
-              Positive values favor White.
-              <br />
-              Negative values favor Black.
+              </div>
             </div>
 
             <MoveBadge
-                classification={hoveredPoint.classification}
-                small
+              classification={hoveredPoint.classification}
+              small
             />
+
+            <div className="mt-3 text-sm text-zinc-400">
+              {hoveredPoint.value > 0
+                ? 'White is better'
+                : hoveredPoint.value < 0
+                  ? 'Black is better'
+                  : 'Position is equal'}
+            </div>
+
+            <div className="mt-3 rounded-xl bg-white/[0.04] p-3 text-xs text-zinc-400">
+              <div className="flex justify-between">
+                <span>Before:</span>
+                <span>
+                  {hoveredPoint.previousValue === null
+                    ? '—'
+                    : formatEval(hoveredPoint.previousValue)}
+                </span>
+              </div>
+
+              <div className="mt-1 flex justify-between">
+                <span>After:</span>
+                <span
+                  className={
+                    hoveredPoint.value >= 0
+                      ? 'text-green-400'
+                      : 'text-red-400'
+                  }
+                >
+                  {formatEval(hoveredPoint.value)}
+                </span>
+              </div>
+            </div>
           </div>
         )}
 

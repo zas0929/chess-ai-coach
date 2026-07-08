@@ -61,8 +61,9 @@ export function useChessGame() {
         fen: game.fen(),
         move: 'start',
         value: 0,
+        previousValue: null,
         source: 'engine',
-      },
+      }
     ]);
 
   const [gameStatus, setGameStatus] =
@@ -133,8 +134,7 @@ export function useChessGame() {
     setEvaluation(value);
 
     setEvaluationHistory((history) => {
-      const previousValue =
-        history.at(-1)?.value ?? 0;
+      const previousValue = history.at(-1)?.value ?? 0;
 
       return [
         ...history,
@@ -143,6 +143,7 @@ export function useChessGame() {
           fen: game.fen(),
           move: game.history().at(-1) ?? '',
           value,
+          previousValue,
           source: 'player',
           classification: classifyMoveByEvalDrop(
             previousValue,
@@ -272,8 +273,7 @@ export function useChessGame() {
       setEvaluation(value);
 
       setEvaluationHistory((history) => {
-        const previousValue =
-          history.at(-1)?.value ?? 0;
+        const previousValue = history.at(-1)?.value ?? 0;
 
         return [
           ...history,
@@ -282,6 +282,7 @@ export function useChessGame() {
             fen: game.fen(),
             move: aiMove?.san ?? response.move,
             value,
+            previousValue,
             source: 'engine',
             classification: classifyMoveByEvalDrop(
               previousValue,
@@ -443,6 +444,7 @@ const chooseSide = useCallback(
         fen: game.fen(),
         move: 'start',
         value: 0,
+        previousValue: null,
         source: 'engine',
       },
     ]);

@@ -116,14 +116,14 @@ function MoveCell({
 
   return (
     <div className="flex min-w-0 items-center gap-2 rounded-lg px-2 py-1">
+      <span className="truncate font-medium text-zinc-100">
+        {san}
+      </span>
+
       <MoveBadge
           classification={point?.classification}
           small
       />
-
-      <span className="truncate font-medium text-zinc-100">
-        {san}
-      </span>
 
       {meta && (
         <span className="hidden truncate text-xs text-zinc-500 2xl:inline">

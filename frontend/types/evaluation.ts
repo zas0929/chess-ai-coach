@@ -13,6 +13,7 @@ export interface EvaluationPoint {
   fen: string;
   move: string;
   value: number;
+  previousValue: number | null;
   source: EvaluationSource;
   classification?: MoveClassification;
 }
