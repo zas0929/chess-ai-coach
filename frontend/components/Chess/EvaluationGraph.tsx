@@ -4,6 +4,12 @@ import { useMemo, useState } from 'react';
 
 import { EvaluationPoint } from '@/types/evaluation';
 import MoveBadge from '@/components/Chess/MoveBadge';
+import {
+  formatEval,
+  getEvalImpactText,
+  getEvalSideText,
+} from '@/utils/evaluationText';
+
 interface Props {
   values: EvaluationPoint[];
   currentValue: number;
@@ -25,14 +31,6 @@ function clamp(value: number) {
   }
 
   return Math.max(-MAX_EVAL, Math.min(MAX_EVAL, value));
-}
-
-function formatEval(value: number) {
-  if (Math.abs(value) >= 900) {
-    return 'Mate';
-  }
-
-  return `${value > 0 ? '+' : ''}${value.toFixed(2)}`;
 }
 
 function classifyMove(value: number) {
@@ -309,11 +307,14 @@ export default function EvaluationGraph({
             )}
 
             <div className="mt-3 text-sm text-zinc-400">
-              {hoveredPoint.value > 0
-                ? 'White is better'
-                : hoveredPoint.value < 0
-                  ? 'Black is better'
-                  : 'Position is equal'}
+              {getEvalSideText(hoveredPoint.value)}
+            </div>
+
+            <div className="mt-1 text-xs text-zinc-500">
+              {getEvalImpactText(
+                hoveredPoint.previousValue,
+                hoveredPoint.value,
+              )}
             </div>
 
             <div className="mt-3 rounded-xl bg-white/[0.04] p-3 text-xs text-zinc-400">
