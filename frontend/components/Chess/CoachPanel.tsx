@@ -1,4 +1,5 @@
 import MoveBadge from '@/components/Chess/MoveBadge';
+import { CoachService } from '@/services/ coach.service';
 import { EvaluationPoint } from '@/types/evaluation';
 
 interface Props {
@@ -8,6 +9,7 @@ interface Props {
 export default function CoachPanel({
   point,
 }: Props) {
+  
   if (!point || point.ply === 0) {
     return (
       <div>
@@ -21,6 +23,8 @@ export default function CoachPanel({
       </div>
     );
   }
+
+  const coach = CoachService.explain(point)
 
   return (
     <div>
@@ -43,7 +47,7 @@ export default function CoachPanel({
         </div>
 
         <div className="mt-4 text-sm leading-6 text-zinc-400">
-          {buildExplanation(point)}
+          {coach.title}
         </div>
       </div>
 
@@ -60,12 +64,13 @@ export default function CoachPanel({
       )}
 
       <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+
         <div className="text-xs uppercase tracking-widest text-zinc-500">
-          Coach Tip
+          {coach.tip}
         </div>
 
         <div className="mt-3 text-sm leading-6 text-zinc-300">
-          {buildTip(point)}
+          {coach.explanation}
         </div>
       </div>
 

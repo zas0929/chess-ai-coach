@@ -54,10 +54,14 @@ export default function HomePage() {
     goToLastMove,
   } = useChessGame();
 
-  const selectedEvaluationPoint =
-    evaluationHistory.find(
-        p => p.ply === viewPly,
-    );
+  const selectedCoachPoint =
+    [...evaluationHistory]
+      .reverse()
+      .find(
+        (point) =>
+          point.ply <= viewPly &&
+          point.source === 'player',
+      );
   
   const topCaptured =
     boardOrientation === 'white'
@@ -102,7 +106,7 @@ export default function HomePage() {
         };
 
   return (
-    <AppShell point={selectedEvaluationPoint}>
+    <AppShell point={selectedCoachPoint}>
       <div className="grid grid-cols-[minmax(680px,1fr)_420px] gap-5">
         <section className="min-w-0">
           <TopGameBar
@@ -142,7 +146,7 @@ export default function HomePage() {
             <EvaluationGraph
               values={evaluationHistory}
               currentValue={evaluation}
-              lastPoint={selectedEvaluationPoint}
+              lastPoint={selectedCoachPoint}
               depth={engineStats?.depth}
               time={engineStats?.time}
               moveTime={engineStats?.move_time ?? moveTime}
