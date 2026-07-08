@@ -146,9 +146,10 @@ export default function HomePage() {
             />
           </Panel>
 
-          <Panel>
-            <MoveHistory moves={moves} />
-          </Panel>
+          <MoveHistory
+            moves={moves}
+            evaluationHistory={evaluationHistory}
+          />
 
           <GameStatus
             status={gameStatus}

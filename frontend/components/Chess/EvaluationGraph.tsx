@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 
 import { EvaluationPoint } from '@/types/evaluation';
+import MoveBadge from '@/components/Chess/MoveBadge';
 interface Props {
   values: EvaluationPoint[];
   currentValue: number;
@@ -283,11 +284,10 @@ export default function EvaluationGraph({
               Negative values favor Black.
             </div>
 
-            <div className="mt-2 inline-flex rounded-lg bg-white/10 px-2 py-1 text-xs text-zinc-200">
-              {formatClassification(
-                hoveredPoint.classification,
-              )}
-            </div>
+            <MoveBadge
+                classification={hoveredPoint.classification}
+                small
+            />
           </div>
         )}
 
