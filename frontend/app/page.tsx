@@ -56,8 +56,8 @@ export default function HomePage() {
 
   const selectedEvaluationPoint =
     evaluationHistory.find(
-      (point) => point.ply === viewPly,
-    ) ?? evaluationHistory[evaluationHistory.length - 1];
+        p => p.ply === viewPly,
+    );
   
   const topCaptured =
     boardOrientation === 'white'
@@ -102,7 +102,7 @@ export default function HomePage() {
         };
 
   return (
-    <AppShell>
+    <AppShell point={selectedEvaluationPoint}>
       <div className="grid grid-cols-[minmax(680px,1fr)_420px] gap-5">
         <section className="min-w-0">
           <TopGameBar
