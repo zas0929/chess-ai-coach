@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.engine import router as engine_router
 
+from app.api.coach import router as coach_router
+
 app = FastAPI(title="Chess AI API")
 
 app.add_middleware(
@@ -17,6 +19,12 @@ app.include_router(
     engine_router,
     prefix="/engine",
     tags=["Engine"]
+)
+
+app.include_router(
+    coach_router,
+    prefix="/coach",
+    tags=["coach"],
 )
 
 
