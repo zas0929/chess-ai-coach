@@ -34,3 +34,8 @@ def analyze_move(data: AnalyzeMoveRequest):
         data.fen_after,
         data.settings,
     )
+
+@router.post("/explain")
+def explain(request):
+
+    return coach_service.explain(request)

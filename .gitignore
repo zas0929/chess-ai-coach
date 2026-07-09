@@ -1,0 +1,83 @@
+# ==========================
+# OS
+# ==========================
+
+.DS_Store
+Thumbs.db
+
+# ==========================
+# IDE
+# ==========================
+
+.vscode/
+.idea/
+
+*.swp
+
+# ==========================
+# Python
+# ==========================
+
+__pycache__/
+*.py[cod]
+
+.pytest_cache/
+
+.mypy_cache/
+
+.ruff_cache/
+
+.coverage
+
+htmlcov/
+
+.venv/
+venv/
+env/
+
+# ==========================
+# Environment
+# ==========================
+
+.env
+.env.local
+
+# ==========================
+# Node
+# ==========================
+
+node_modules/
+
+.next/
+
+out/
+
+dist/
+
+coverage/
+
+npm-debug.log*
+
+yarn-error.log*
+
+pnpm-lock.yaml
+
+# ==========================
+# Build
+# ==========================
+
+*.egg-info/
+
+build/
+
+dist/
+
+# ==========================
+# Misc
+# ==========================
+
+*.log
+
+# Temporary editor files
+..*
+*.рус

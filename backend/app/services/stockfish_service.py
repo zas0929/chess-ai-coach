@@ -8,7 +8,7 @@ class StockfishService:
 
     def __init__(self):
         self.engine = Stockfish(
-            path=settings.STOCKFISH_PATH
+            path=settings.stockfish_path
         )
 
         self.engine.set_skill_level(10)
