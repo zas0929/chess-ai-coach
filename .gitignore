@@ -41,6 +41,7 @@ env/
 
 .env
 .env.local
+backend/.env
 
 # ==========================
 # Node
