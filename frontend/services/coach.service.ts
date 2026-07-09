@@ -1,5 +1,5 @@
-import { EvaluationPoint } from '@/types/evaluation';
 import { CoachResponse } from '@/types/coach';
+import { EvaluationPoint } from '@/types/evaluation';
 
 export const CoachService = {
   explain(point: EvaluationPoint): CoachResponse {
@@ -19,8 +19,7 @@ export const CoachService = {
           title: 'Very strong move',
           explanation:
             'Your move keeps the initiative and maintains the evaluation.',
-          tip:
-            'Keep improving your piece activity.',
+          tip: 'Keep improving your piece activity.',
           severity: 'success',
         };
 
@@ -66,9 +65,11 @@ export const CoachService = {
 
       default:
         return {
-          title: 'Position',
-          explanation: '',
-          tip: '',
+          title: 'Position analyzed',
+          explanation:
+            'The position has been analyzed by the engine.',
+          tip:
+            'Use the evaluation and best move suggestion to guide your next decision.',
           severity: 'info',
         };
     }

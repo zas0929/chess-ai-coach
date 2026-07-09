@@ -1,39 +1,53 @@
 import MoveBadge from '@/components/Chess/MoveBadge';
-import { CoachService } from '@/services/ coach.service';
+import { CoachService } from '@/services/coach.service';
 import { EvaluationPoint } from '@/types/evaluation';
+import { formatEval } from '@/utils/evaluationText';
 
 interface Props {
   point?: EvaluationPoint;
 }
 
-export default function CoachPanel({
-  point,
-}: Props) {
-  
+const severityClass = {
+  success: 'border-emerald-500/20 bg-emerald-500/10',
+  info: 'border-sky-500/20 bg-sky-500/10',
+  warning: 'border-yellow-500/20 bg-yellow-500/10',
+  danger: 'border-red-500/20 bg-red-500/10',
+};
+
+export default function CoachPanel({ point }: Props) {
   if (!point || point.ply === 0) {
     return (
       <div>
         <SectionTitle />
 
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-          <div className="text-zinc-400">
-            Play your first move to start the analysis.
-          </div>
+        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm text-zinc-400">
+          Play your first move to start the analysis.
         </div>
       </div>
     );
   }
 
-  const coach = CoachService.explain(point)
+  const coach = CoachService.explain(point);
 
   return (
     <div>
       <SectionTitle />
 
-      <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <div className="font-semibold text-white">
-            Move {point.ply}
+      <div
+        className={[
+          'rounded-2xl border p-4',
+          severityClass[coach.severity],
+        ].join(' ')}
+      >
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <div>
+            <div className="text-xs uppercase tracking-widest text-zinc-500">
+              Move {point.ply}
+            </div>
+
+            <div className="mt-1 text-2xl font-semibold text-white">
+              {point.move}
+            </div>
           </div>
 
           <MoveBadge
@@ -42,12 +56,41 @@ export default function CoachPanel({
           />
         </div>
 
-        <div className="text-lg font-semibold text-white">
-          {point.move}
+        <div className="mt-4 text-lg font-semibold text-white">
+          {coach.title}
         </div>
 
-        <div className="mt-4 text-sm leading-6 text-zinc-400">
-          {coach.title}
+        <div className="mt-2 text-sm leading-6 text-zinc-300">
+          {coach.explanation}
+        </div>
+      </div>
+
+      <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+        <div className="text-xs uppercase tracking-widest text-zinc-500">
+          Evaluation
+        </div>
+
+        <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
+          <MiniStat
+            label="Before"
+            value={
+              point.previousValue === null
+                ? '—'
+                : formatEval(point.previousValue)
+            }
+          />
+
+          <MiniStat
+            label="After"
+            value={formatEval(point.value)}
+            tone={point.value >= 0 ? 'positive' : 'negative'}
+          />
+
+          <MiniStat
+            label="Change"
+            value={`${point.evalChange > 0 ? '+' : ''}${point.evalChange.toFixed(2)}`}
+            tone={point.evalChange >= 0 ? 'positive' : 'negative'}
+          />
         </div>
       </div>
 
@@ -64,19 +107,16 @@ export default function CoachPanel({
       )}
 
       <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-
         <div className="text-xs uppercase tracking-widest text-zinc-500">
-          {coach.tip}
+          Coach Tip
         </div>
 
         <div className="mt-3 text-sm leading-6 text-zinc-300">
-          {coach.explanation}
+          {coach.tip}
         </div>
       </div>
 
-      <button
-        className="mt-5 w-full rounded-2xl border border-violet-500/30 bg-violet-500/15 py-3 text-sm font-medium text-violet-300 transition hover:bg-violet-500/25"
-      >
+      <button className="mt-5 w-full rounded-2xl border border-violet-500/30 bg-violet-500/15 py-3 text-sm font-medium text-violet-300 transition hover:bg-violet-500/25">
         ✨ Explain this move
       </button>
     </div>
@@ -97,42 +137,33 @@ function SectionTitle() {
   );
 }
 
-function buildExplanation(point: EvaluationPoint) {
-  switch (point.classification) {
-    case 'best':
-      return 'Excellent move. You found the strongest continuation according to the engine.';
+function MiniStat({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone?: 'positive' | 'negative';
+}) {
+  return (
+    <div className="rounded-xl bg-white/[0.04] px-3 py-2">
+      <div className="text-[11px] text-zinc-500">
+        {label}
+      </div>
 
-    case 'excellent':
-      return 'Very strong move. You maintained your advantage.';
-
-    case 'good':
-      return 'A solid move that keeps the position comfortable.';
-
-    case 'inaccuracy':
-      return 'This move is playable, but there was a stronger continuation available.';
-
-    case 'mistake':
-      return 'This move gives away part of your advantage. Consider the suggested engine move.';
-
-    case 'blunder':
-      return 'A serious mistake that changes the evaluation significantly.';
-
-    default:
-      return 'Position analyzed.';
-  }
-}
-
-function buildTip(point: EvaluationPoint) {
-  if (point.classification === 'best') {
-    return 'Keep looking for forcing moves like checks, captures and threats.';
-  }
-
-  if (
-    point.classification === 'mistake' ||
-    point.classification === 'blunder'
-  ) {
-    return 'Before making a move, quickly check if your opponent has any tactical responses.';
-  }
-
-  return 'Continue developing your pieces and improve coordination.';
+      <div
+        className={[
+          'mt-1 font-medium',
+          tone === 'positive'
+            ? 'text-green-400'
+            : tone === 'negative'
+              ? 'text-red-400'
+              : 'text-zinc-200',
+        ].join(' ')}
+      >
+        {value}
+      </div>
+    </div>
+  );
 }
