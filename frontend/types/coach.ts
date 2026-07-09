@@ -10,3 +10,17 @@ export interface CoachResponse {
   tip: string;
   severity: CoachSeverity;
 }
+
+export interface CoachExplainRequest {
+  fen: string;
+  move: string;
+  bestMove?: string;
+  classification?: string;
+  previousValue: number | null;
+  value: number;
+  evalChange: number;
+}
+
+export interface CoachExplainResponse {
+  explanation: string;
+}

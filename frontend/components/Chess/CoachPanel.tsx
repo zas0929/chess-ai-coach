@@ -1,3 +1,7 @@
+'use client';
+
+import { useState } from 'react';
+
 import MoveBadge from '@/components/Chess/MoveBadge';
 import { CoachService } from '@/services/coach.service';
 import { EvaluationPoint } from '@/types/evaluation';
@@ -28,6 +32,34 @@ export default function CoachPanel({ point }: Props) {
   }
 
   const coach = CoachService.explain(point);
+
+  const [aiExplanation, setAiExplanation] =
+  useState<string | null>(null);
+
+  const [isExplaining, setIsExplaining] =
+    useState(false);
+
+  const explainMove = async () => {
+    if (!point) return;
+
+    setIsExplaining(true);
+
+    try {
+      const response = await CoachService.explainWithAI({
+        fen: point.fen,
+        move: point.move,
+        bestMove: point.bestMove,
+        classification: point.classification,
+        previousValue: point.previousValue,
+        value: point.value,
+        evalChange: point.evalChange,
+      });
+
+      setAiExplanation(response.explanation);
+    } finally {
+      setIsExplaining(false);
+    }
+  };
 
   return (
     <div>
@@ -116,9 +148,27 @@ export default function CoachPanel({ point }: Props) {
         </div>
       </div>
 
-      <button className="mt-5 w-full rounded-2xl border border-violet-500/30 bg-violet-500/15 py-3 text-sm font-medium text-violet-300 transition hover:bg-violet-500/25">
-        ✨ Explain this move
+      <button
+        onClick={explainMove}
+        disabled={isExplaining}
+        className="mt-5 w-full rounded-2xl border border-violet-500/30 bg-violet-500/15 py-3 text-sm font-medium text-violet-300 transition hover:bg-violet-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {isExplaining
+          ? 'Thinking...'
+          : '✨ Explain this move'}
       </button>
+
+      {aiExplanation && (
+        <div className="mt-4 rounded-2xl border border-violet-500/20 bg-violet-500/10 p-4">
+          <div className="text-xs uppercase tracking-widest text-violet-300">
+            AI Explanation
+          </div>
+
+          <div className="mt-3 text-sm leading-6 text-zinc-300">
+            {aiExplanation}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
