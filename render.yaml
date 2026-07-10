@@ -3,6 +3,7 @@ services:
     name: chess-ai-coach-api
     runtime: docker
     dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
     plan: starter
     healthCheckPath: /
     envVars:
