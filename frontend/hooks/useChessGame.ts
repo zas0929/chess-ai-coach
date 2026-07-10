@@ -402,11 +402,17 @@ const chooseSide = useCallback(
 
       const fenBeforePlayerMove = game.fen();
 
-      const playerMove = game.move({
-        from: sourceSquare,
-        to: targetSquare,
-        promotion: 'q',
-      });
+      const playerMove = (() => {
+        try {
+          return game.move({
+            from: sourceSquare,
+            to: targetSquare,
+            promotion: 'q',
+          });
+        } catch {
+          return null;
+        }
+      })();
 
       if (!playerMove) {
         return false;
@@ -468,45 +474,57 @@ const chooseSide = useCallback(
   );
   
   const selectPiece = useCallback(
-    async (square: Square) => {
+    (square: Square) => {
         if (thinking || !isLivePosition) {
           return;
-        }
-
-        if (selectedSquare) {
-          const moved = await onDrop(selectedSquare, square);
-
-          if (moved) {
-            setSelectedSquare(null);
-            setPossibleMoves([]);
-            return;
-          }
         }
 
         const piece = game.get(square);
 
         if (!piece) {
+          if (selectedSquare) {
+            const moved = onDrop(selectedSquare, square);
+
+            if (moved) {
+              setSelectedSquare(null);
+              setPossibleMoves([]);
+            }
+
+            return;
+          }
+
           setSelectedSquare(null);
           setPossibleMoves([]);
           return;
         }
 
-        if (piece.color !== game.turn()) {
-          setSelectedSquare(null);
-          setPossibleMoves([]);
+        if (piece.color === game.turn()) {
+          const moves = game.moves({
+            square,
+            verbose: true,
+          });
+
+          setSelectedSquare(square);
+
+          setPossibleMoves(
+            moves.map((move) => move.to as Square),
+          );
+
           return;
         }
 
-        const moves = game.moves({
-          square,
-          verbose: true,
-        });
+        if (selectedSquare) {
+          const moved = onDrop(selectedSquare, square);
 
-        setSelectedSquare(square);
+          if (moved) {
+            setSelectedSquare(null);
+            setPossibleMoves([]);
+          }
 
-        setPossibleMoves(
-          moves.map((move) => move.to as Square),
-        );
+          return;
+        }
+        setSelectedSquare(null);
+        setPossibleMoves([]);
       },
     [
       game,
