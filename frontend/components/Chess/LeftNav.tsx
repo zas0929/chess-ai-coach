@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
+import Image from 'next/image';
 
 import { useAuth } from '@/components/Auth/AuthGate';
 import CoachPanel from '@/components/Chess/CoachPanel';
@@ -15,6 +16,12 @@ export default function LeftNav({
 }: Props) {
     const { session, isConfigured, signOut } = useAuth();
     const email = session?.user.email ?? 'Guest mode';
+    const avatarUrl =
+        typeof session?.user.user_metadata.avatar_url === 'string'
+            ? session.user.user_metadata.avatar_url
+            : typeof session?.user.user_metadata.picture === 'string'
+                ? session.user.user_metadata.picture
+                : null;
     const initial = useMemo(
         () => email.trim().charAt(0).toUpperCase() || 'G',
         [email],
@@ -40,9 +47,21 @@ export default function LeftNav({
             </div>
 
             <div className="mb-4 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.035] px-3 py-2.5 shadow-lg shadow-black/10">
-                <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-violet-300/20 bg-violet-400/15 text-sm font-semibold text-violet-100">
-                    {initial}
-                </div>
+                {avatarUrl ? (
+                    <Image
+                        src={avatarUrl}
+                        alt=""
+                        width={36}
+                        height={36}
+                        unoptimized
+                        referrerPolicy="no-referrer"
+                        className="h-9 w-9 shrink-0 rounded-xl border border-white/10 object-cover"
+                    />
+                ) : (
+                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-violet-300/20 bg-violet-400/15 text-sm font-semibold text-violet-100">
+                        {initial}
+                    </div>
+                )}
 
                 <div className="min-w-0 flex-1">
                     <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-zinc-500">
