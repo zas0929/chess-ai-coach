@@ -56,7 +56,8 @@ export default function HomePage() {
       .find(
         (point) =>
           point.ply <= viewPly &&
-          point.source === 'player',
+          point.source === 'player' &&
+          point.side === playerColor,
       );
   
   const topCaptured =

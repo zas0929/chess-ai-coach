@@ -54,6 +54,8 @@ export function useChessGame() {
     useState(false);
 
   const boardOrientation = playerColor;
+  const engineColor =
+    playerColor === 'white' ? 'black' : 'white';
 
   const [viewPly, setViewPly] = useState(0);
 
@@ -67,7 +69,7 @@ export function useChessGame() {
         moveNumber: 0,
         side: 'white',
         player: playerColor,
-        engine: playerColor === 'white' ? 'black' : 'white',
+        engine: engineColor,
         history: [],
         value: 0,
         previousValue: null,
@@ -196,9 +198,6 @@ export function useChessGame() {
         const ply = moveHistory.length;
         const side = ply % 2 === 1 ? 'white' : 'black';
         const moveNumber = Math.ceil(ply / 2);
-        const engineColor =
-          playerColor === 'white' ? 'black' : 'white';
-
         return [
           ...history,
           {
@@ -227,7 +226,7 @@ export function useChessGame() {
         ];
       });
     },
-    [game, playerColor],
+    [engineColor, game, playerColor],
   );
 
   const analyzePlayerMove = useCallback(
@@ -444,6 +443,19 @@ const chooseSide = useCallback(
         return false;
       }
 
+      if (game.turn() !== playerColor[0]) {
+        return false;
+      }
+
+      const sourcePiece = game.get(sourceSquare);
+
+      if (
+        !sourcePiece ||
+        sourcePiece.color !== playerColor[0]
+      ) {
+        return false;
+      }
+
       const fenBeforePlayerMove = game.fen();
 
       const playerMove = (() => {
@@ -511,6 +523,7 @@ const chooseSide = useCallback(
     game,
     thinking,
     isLivePosition,
+    playerColor,
     updateState,
     analyzePlayerMove,
     makeEngineMove,
@@ -520,6 +533,10 @@ const chooseSide = useCallback(
   const selectPiece = useCallback(
     (square: Square) => {
         if (thinking || !isLivePosition) {
+          return;
+        }
+
+        if (game.turn() !== playerColor[0]) {
           return;
         }
 
@@ -542,7 +559,10 @@ const chooseSide = useCallback(
           return;
         }
 
-        if (piece.color === game.turn()) {
+        if (
+          piece.color === game.turn() &&
+          piece.color === playerColor[0]
+        ) {
           const moves = game.moves({
             square,
             verbose: true,
@@ -557,7 +577,10 @@ const chooseSide = useCallback(
           return;
         }
 
-        if (selectedSquare) {
+        if (
+          selectedSquare &&
+          piece.color !== playerColor[0]
+        ) {
           const moved = onDrop(selectedSquare, square);
 
           if (moved) {
@@ -575,11 +598,12 @@ const chooseSide = useCallback(
       thinking,
       isLivePosition,
       selectedSquare,
+      playerColor,
       onDrop,
     ],
   );
 
-  const newGame = useCallback(() => {
+  const newGame = useCallback(async () => {
     game.reset();
 
     SoundService.play('start');
@@ -603,7 +627,7 @@ const chooseSide = useCallback(
         moveNumber: 0,
         side: 'white',
         player: playerColor,
-        engine: playerColor === 'white' ? 'black' : 'white',
+        engine: engineColor,
         history: [],
         value: 0,
         previousValue: null,
@@ -614,7 +638,17 @@ const chooseSide = useCallback(
     ]);
 
     setWinner(null);
-  }, [game, playerColor, updateState]);
+
+    if (playerColor === 'black') {
+      await makeEngineMove();
+    }
+  }, [
+    engineColor,
+    game,
+    makeEngineMove,
+    playerColor,
+    updateState,
+  ]);
 
   const undo = useCallback(() => {
     if (game.history().length === 0) {
@@ -641,7 +675,7 @@ const chooseSide = useCallback(
           moveNumber: 0,
           side: 'white',
           player: playerColor,
-          engine: playerColor === 'white' ? 'black' : 'white',
+          engine: engineColor,
           history: [],
           value: 0,
           previousValue: null,
@@ -650,7 +684,7 @@ const chooseSide = useCallback(
           bestMove: undefined,
         }],
     );
-  }, [game, playerColor, updateState]);
+  }, [engineColor, game, playerColor, updateState]);
   
 
   return {

@@ -2,7 +2,7 @@ interface Props {
   playerColor: 'white' | 'black';
   onChooseSide: (color: 'white' | 'black' | 'random') => void;
   onFlipBoard: () => void;
-  onNewGame: () => void;
+  onNewGame: () => void | Promise<void>;
   onUndo: () => void;
 }
 

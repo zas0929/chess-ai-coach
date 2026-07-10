@@ -24,15 +24,6 @@ const severityClass = {
 };
 
 export default function CoachPanel({ point }: Props) {
-  return (
-    <CoachPanelContent
-      key={point ? `${point.ply}-${point.move}` : 'empty'}
-      point={point}
-    />
-  );
-}
-
-function CoachPanelContent({ point }: Props) {
   const [coachBrief, setCoachBrief] =
     useState<CoachExplainResponse | null>(null);
 
@@ -241,9 +232,12 @@ function CoachPanelContent({ point }: Props) {
             <button
               onClick={startCoachChat}
               disabled={isExplaining}
-              className="rounded-xl border border-violet-400/30 bg-violet-400/10 px-3 py-2 text-xs font-medium text-violet-200 transition hover:bg-violet-400/20 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-xl border border-violet-400/30 bg-violet-400/10 px-3 py-2 text-xs font-medium text-violet-200 transition hover:bg-violet-400/20 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isExplaining ? 'Thinking...' : 'Start'}
+              {isExplaining && (
+                <span className="h-3 w-3 animate-spin rounded-full border border-violet-200/30 border-t-violet-200" />
+              )}
+              {isExplaining ? 'Thinking' : 'Start'}
             </button>
           )}
         </div>
@@ -285,6 +279,14 @@ function CoachPanelContent({ point }: Props) {
                 {message.content}
               </div>
             ))}
+
+            {isChatting && <TypingBubble />}
+          </div>
+        )}
+
+        {chatMessages.length === 0 && isChatting && (
+          <div className="mt-4">
+            <TypingBubble />
           </div>
         )}
 
@@ -303,12 +305,29 @@ function CoachPanelContent({ point }: Props) {
 
           <button
             disabled={isChatting || !draftMessage.trim()}
-            className="rounded-xl border border-violet-400/30 bg-violet-400/15 px-4 py-2 text-sm font-medium text-violet-200 transition hover:bg-violet-400/25 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-violet-400/30 bg-violet-400/15 px-4 py-2 text-sm font-medium text-violet-200 transition hover:bg-violet-400/25 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {isChatting ? '...' : 'Ask'}
+            {isChatting && (
+              <span className="h-4 w-4 animate-spin rounded-full border border-violet-200/30 border-t-violet-200" />
+            )}
+            {isChatting ? 'Thinking' : 'Ask'}
           </button>
         </form>
       </div>
+    </div>
+  );
+}
+
+function TypingBubble() {
+  return (
+    <div className="mr-6 flex items-center gap-3 rounded-xl bg-[#0b1118]/60 px-3 py-3 text-sm text-zinc-300">
+      <span className="h-4 w-4 animate-spin rounded-full border border-violet-300/30 border-t-violet-300" />
+      <span>Coach is thinking</span>
+      <span className="flex gap-1">
+        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-violet-300" />
+        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-violet-300 [animation-delay:120ms]" />
+        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-violet-300 [animation-delay:240ms]" />
+      </span>
     </div>
   );
 }
