@@ -1,5 +1,6 @@
 from typing import Optional
 
+from pydantic import computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -17,6 +18,25 @@ class Settings(BaseSettings):
     free_ai_requests: int = 3
 
     frontend_origin: str = "http://localhost:3000"
+    frontend_origins: Optional[str] = None
+
+    @computed_field
+    @property
+    def cors_origins(self) -> list[str]:
+        raw_origins = self.frontend_origins or self.frontend_origin
+
+        origins = [
+            origin.strip().rstrip("/")
+            for origin in raw_origins.split(",")
+            if origin.strip()
+        ]
+
+        local_origins = [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+        ]
+
+        return list(dict.fromkeys([*origins, *local_origins]))
 
     stripe_secret_key: Optional[str] = None
     stripe_webhook_secret: Optional[str] = None

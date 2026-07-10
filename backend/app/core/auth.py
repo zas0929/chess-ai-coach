@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import logging
 from typing import Optional
 
 import jwt
@@ -9,6 +10,7 @@ from app.core.config import settings
 
 
 security = HTTPBearer(auto_error=False)
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -38,14 +40,27 @@ def get_current_user(
 
         return CurrentUser(id="dev-user")
 
+    token = credentials.credentials
+
+    try:
+        header = jwt.get_unverified_header(token)
+    except jwt.PyJWTError:
+        header = {}
+
     try:
         payload = jwt.decode(
-            credentials.credentials,
+            token,
             settings.supabase_jwt_secret,
             algorithms=["HS256"],
             options={"verify_aud": False},
         )
     except jwt.PyJWTError as error:
+        logger.warning(
+            "JWT validation failed: alg=%s kid=%s error=%s",
+            header.get("alg"),
+            header.get("kid"),
+            error.__class__.__name__,
+        )
         raise HTTPException(
             status_code=401,
             detail="Invalid authentication token",
