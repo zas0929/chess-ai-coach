@@ -30,6 +30,12 @@ const openingStats: Record<
     draw: 24,
     black: 27,
   },
+  'Open Game': {
+    played: '2.9M',
+    white: 52,
+    draw: 26,
+    black: 22,
+  },
   'French Defense': {
     played: '940K',
     white: 48,
@@ -48,10 +54,34 @@ const openingStats: Record<
     draw: 28,
     black: 17,
   },
+  'Closed Game': {
+    played: '1.5M',
+    white: 53,
+    draw: 30,
+    black: 17,
+  },
+  'Indian Game': {
+    played: '1.1M',
+    white: 52,
+    draw: 27,
+    black: 21,
+  },
   'Reti Opening': {
     played: '760K',
     white: 53,
     draw: 30,
+    black: 17,
+  },
+  "Reti Opening: Reversed Queen's Pawn": {
+    played: '420K',
+    white: 52,
+    draw: 31,
+    black: 17,
+  },
+  "Reti Opening: King's Indian Attack Setup": {
+    played: '360K',
+    white: 51,
+    draw: 32,
     black: 17,
   },
   'Van Geet Opening': {

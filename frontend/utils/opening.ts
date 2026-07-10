@@ -12,6 +12,10 @@ const openings = [
     moves: ['e4', 'c5'],
   },
   {
+    name: 'Open Game',
+    moves: ['e4', 'e5'],
+  },
+  {
     name: 'French Defense',
     moves: ['e4', 'e6'],
   },
@@ -24,6 +28,14 @@ const openings = [
     moves: ['d4', 'd5', 'c4'],
   },
   {
+    name: 'Closed Game',
+    moves: ['d4', 'd5'],
+  },
+  {
+    name: 'Indian Game',
+    moves: ['d4', 'Nf6'],
+  },
+  {
     name: "King's Indian Defense",
     moves: ['d4', 'Nf6', 'c4', 'g6'],
   },
@@ -34,6 +46,14 @@ const openings = [
   {
     name: 'Reti Opening',
     moves: ['Nf3'],
+  },
+  {
+    name: "Reti Opening: Reversed Queen's Pawn",
+    moves: ['Nf3', 'd5'],
+  },
+  {
+    name: "Reti Opening: King's Indian Attack Setup",
+    moves: ['Nf3', 'Nf6'],
   },
   {
     name: 'Van Geet Opening',

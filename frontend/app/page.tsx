@@ -63,11 +63,11 @@ export default function HomePage() {
       );
 
   const currentOpening =
+    detectOpening(moves) ??
     selectedCoachPoint?.opening ??
     [...evaluationHistory]
       .reverse()
-      .find((point) => point.opening)?.opening ??
-    detectOpening(moves);
+      .find((point) => point.opening)?.opening;
   
   const topCaptured =
     boardOrientation === 'white'
