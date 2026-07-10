@@ -1,17 +1,45 @@
-from typing import Optional
+from typing import Literal, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
-class CoachExplainRequest(BaseModel):
-    fen: str
+class CoachContext(BaseModel):
+    fen_before: str
+    fen_after: str
     move: str
-    best_move: Optional[str] = None
+    move_number: int
+    side: Literal["white", "black"]
+    player: Literal["white", "black"]
+    engine: Literal["white", "black"]
     classification: Optional[str] = None
-    previous_value: Optional[float] = None
-    value: float
-    eval_change: float
+    evaluation_before: Optional[float] = None
+    evaluation_after: float
+    evaluation_change: float
+    best_move: Optional[str] = None
+    opening: Optional[str] = None
+    history: list[str] = Field(default_factory=list)
+
+
+class CoachExplainRequest(CoachContext):
+    pass
 
 
 class CoachExplainResponse(BaseModel):
+    title: str
     explanation: str
+    tip: str
+    theme: str
+
+
+class CoachChatMessage(BaseModel):
+    role: Literal["user", "assistant"]
+    content: str
+
+
+class CoachChatRequest(BaseModel):
+    context: CoachContext
+    messages: list[CoachChatMessage]
+
+
+class CoachChatResponse(BaseModel):
+    answer: str

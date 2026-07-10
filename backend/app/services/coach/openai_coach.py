@@ -1,12 +1,16 @@
+import json
+
 from openai import OpenAI
 
 from app.core.config import settings
 from app.models.coach import (
+    CoachChatRequest,
+    CoachChatResponse,
     CoachExplainRequest,
     CoachExplainResponse,
 )
 from app.services.coach.base import BaseCoach
-from app.services.coach.prompt import SYSTEM_PROMPT
+from app.services.coach.prompt import CHAT_PROMPT, SYSTEM_PROMPT
 
 
 class OpenAICoach(BaseCoach):
@@ -21,18 +25,14 @@ class OpenAICoach(BaseCoach):
         self,
         request: CoachExplainRequest,
     ) -> CoachExplainResponse:
-        user_prompt = f"""
-Move: {request.move}
-Best move: {request.best_move or "unknown"}
-Classification: {request.classification or "unknown"}
-
-Evaluation before: {request.previous_value}
-Evaluation after: {request.value}
-Evaluation change: {request.eval_change}
-
-FEN after move:
-{request.fen}
-"""
+        user_prompt = {
+            "task": (
+                "Explain this chess move. Return JSON with keys "
+                "title, explanation, tip, theme. Do not invent the "
+                "classification; use the provided classification."
+            ),
+            "context": request.model_dump(),
+        }
 
         response = self.client.responses.create(
             model=self.model,
@@ -43,11 +43,52 @@ FEN after move:
                 },
                 {
                     "role": "user",
-                    "content": user_prompt,
+                    "content": json.dumps(user_prompt),
                 },
             ],
         )
 
-        return CoachExplainResponse(
-            explanation=response.output_text,
+        try:
+            payload = json.loads(response.output_text)
+            return CoachExplainResponse(**payload)
+        except (json.JSONDecodeError, TypeError, ValueError):
+            return CoachExplainResponse(
+                title=request.classification or "Move explained",
+                explanation=response.output_text,
+                tip="Compare your move with the engine recommendation and look for the changed threat.",
+                theme=request.opening or "Move quality",
+            )
+
+    def chat(
+        self,
+        request: CoachChatRequest,
+    ) -> CoachChatResponse:
+        context_prompt = {
+            "task": "Answer the user's chess coaching question.",
+            "context": request.context.model_dump(),
+        }
+
+        response = self.client.responses.create(
+            model=self.model,
+            input=[
+                {
+                    "role": "system",
+                    "content": CHAT_PROMPT,
+                },
+                {
+                    "role": "user",
+                    "content": json.dumps(context_prompt),
+                },
+                *[
+                    {
+                        "role": message.role,
+                        "content": message.content,
+                    }
+                    for message in request.messages
+                ],
+            ],
+        )
+
+        return CoachChatResponse(
+            answer=response.output_text,
         )

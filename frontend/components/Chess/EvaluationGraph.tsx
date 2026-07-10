@@ -53,7 +53,13 @@ export default function EvaluationGraph({
             {
               ply: 0,
               fen: '',
+              fenBefore: '',
               move: 'start',
+              moveNumber: 0,
+              side: 'white' as const,
+              player: 'white' as const,
+              engine: 'black' as const,
+              history: [],
               value: 0,
               previousValue: null,
               evalChange: 0,

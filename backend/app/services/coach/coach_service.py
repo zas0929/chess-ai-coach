@@ -16,5 +16,8 @@ class CoachService:
     def explain(self, request):
         return self.coach.explain(request)
 
+    def chat(self, request):
+        return self.coach.chat(request)
+
 
 coach_service = CoachService()

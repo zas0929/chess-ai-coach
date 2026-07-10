@@ -7,6 +7,7 @@ import { getMaterialState } from '@/utils/material';
 import { EvaluationPoint } from '@/types/evaluation';
 import { classifyMoveByEvalDrop } from '@/utils/classifyMove';
 import { EngineStats } from '@/types/engine';
+import { detectOpening } from '@/utils/opening';
 
 export function useChessGame() {
   // Один экземпляр игры на весь жизненный цикл компонента
@@ -61,7 +62,13 @@ export function useChessGame() {
       {
         ply: 0,
         fen: game.fen(),
+        fenBefore: game.fen(),
         move: 'start',
+        moveNumber: 0,
+        side: 'white',
+        player: playerColor,
+        engine: playerColor === 'white' ? 'black' : 'white',
+        history: [],
         value: 0,
         previousValue: null,
         source: 'engine',
@@ -168,11 +175,13 @@ export function useChessGame() {
       move,
       source,
       bestMove,
+      fenBefore,
     }: {
       value: number;
       move: string;
       source: 'player' | 'engine';
       bestMove?: string;
+      fenBefore: string;
     }) => {
       setEvaluation(value);
 
@@ -183,13 +192,26 @@ export function useChessGame() {
 
         const evalChange =
           value - previousValue;
+        const moveHistory = game.history();
+        const ply = moveHistory.length;
+        const side = ply % 2 === 1 ? 'white' : 'black';
+        const moveNumber = Math.ceil(ply / 2);
+        const engineColor =
+          playerColor === 'white' ? 'black' : 'white';
 
         return [
           ...history,
           {
-            ply: game.history().length,
+            ply,
             fen: game.fen(),
+            fenBefore,
             move,
+            moveNumber,
+            side,
+            player: playerColor,
+            engine: engineColor,
+            opening: detectOpening(moveHistory),
+            history: moveHistory,
             value,
             previousValue,
             evalChange,
@@ -205,7 +227,7 @@ export function useChessGame() {
         ];
       });
     },
-    [game],
+    [game, playerColor],
   );
 
   const analyzePlayerMove = useCallback(
@@ -234,6 +256,7 @@ export function useChessGame() {
         move: lastMoveSan,
         source: 'player',
         bestMove: response.best_move,
+        fenBefore,
       });
 
       return value;
@@ -289,6 +312,8 @@ export function useChessGame() {
       setThinking(true);
 
       try {
+        const fenBeforeEngineMove = game.fen();
+
         const response =
           await EngineService.getBestMove({
             fen: game.fen(),
@@ -338,6 +363,7 @@ export function useChessGame() {
           move: aiMove.san,
           source: 'engine',
           bestMove: response.move,
+          fenBefore: fenBeforeEngineMove,
         });
       } catch (error) {
         console.error(error);
@@ -377,6 +403,24 @@ const chooseSide = useCallback(
       setLastMove(null);
       setSelectedSquare(null);
       setPossibleMoves([]);
+      setEvaluationHistory([
+        {
+          ply: 0,
+          fen: game.fen(),
+          fenBefore: game.fen(),
+          move: 'start',
+          moveNumber: 0,
+          side: 'white',
+          player: selectedColor,
+          engine: selectedColor === 'white' ? 'black' : 'white',
+          history: [],
+          value: 0,
+          previousValue: null,
+          source: 'engine',
+          evalChange: 0,
+          bestMove: undefined,
+        },
+      ]);
 
       updateState();
 
@@ -554,7 +598,13 @@ const chooseSide = useCallback(
       {
         ply: 0,
         fen: game.fen(),
+        fenBefore: game.fen(),
         move: 'start',
+        moveNumber: 0,
+        side: 'white',
+        player: playerColor,
+        engine: playerColor === 'white' ? 'black' : 'white',
+        history: [],
         value: 0,
         previousValue: null,
         source: 'engine',
@@ -564,7 +614,7 @@ const chooseSide = useCallback(
     ]);
 
     setWinner(null);
-  }, [game, updateState]);
+  }, [game, playerColor, updateState]);
 
   const undo = useCallback(() => {
     if (game.history().length === 0) {
@@ -586,7 +636,13 @@ const chooseSide = useCallback(
         : [{
           ply: 0,
           fen: game.fen(),
+          fenBefore: game.fen(),
           move: 'start',
+          moveNumber: 0,
+          side: 'white',
+          player: playerColor,
+          engine: playerColor === 'white' ? 'black' : 'white',
+          history: [],
           value: 0,
           previousValue: null,
           source: 'engine',
@@ -594,7 +650,7 @@ const chooseSide = useCallback(
           bestMove: undefined,
         }],
     );
-  }, [game, updateState]);
+  }, [game, playerColor, updateState]);
   
 
   return {

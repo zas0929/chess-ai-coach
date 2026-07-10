@@ -1,4 +1,10 @@
-import { CoachExplainRequest, CoachExplainResponse, CoachResponse } from '@/types/coach';
+import {
+  CoachChatRequest,
+  CoachChatResponse,
+  CoachExplainRequest,
+  CoachExplainResponse,
+  CoachResponse,
+} from '@/types/coach';
 import { EvaluationPoint } from '@/types/evaluation';
 import { api } from '@/lib/api';
 
@@ -82,13 +88,48 @@ export const CoachService = {
       await api.post<CoachExplainResponse>(
         '/coach/explain',
         {
-          fen: request.fen,
+          fen_before: request.fenBefore,
+          fen_after: request.fenAfter,
           move: request.move,
+          move_number: request.moveNumber,
+          side: request.side,
+          player: request.player,
+          engine: request.engine,
           best_move: request.bestMove,
           classification: request.classification,
-          previous_value: request.previousValue,
-          value: request.value,
-          eval_change: request.evalChange,
+          evaluation_before: request.evaluationBefore,
+          evaluation_after: request.evaluationAfter,
+          evaluation_change: request.evaluationChange,
+          opening: request.opening,
+          history: request.history,
+        },
+      )
+    ).data;
+  },
+  async chat(
+    request: CoachChatRequest,
+  ): Promise<CoachChatResponse> {
+    return (
+      await api.post<CoachChatResponse>(
+        '/coach/chat',
+        {
+          context: {
+            fen_before: request.context.fenBefore,
+            fen_after: request.context.fenAfter,
+            move: request.context.move,
+            move_number: request.context.moveNumber,
+            side: request.context.side,
+            player: request.context.player,
+            engine: request.context.engine,
+            best_move: request.context.bestMove,
+            classification: request.context.classification,
+            evaluation_before: request.context.evaluationBefore,
+            evaluation_after: request.context.evaluationAfter,
+            evaluation_change: request.context.evaluationChange,
+            opening: request.context.opening,
+            history: request.context.history,
+          },
+          messages: request.messages,
         },
       )
     ).data;

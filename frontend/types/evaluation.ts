@@ -11,7 +11,14 @@ export type MoveClassification =
 export interface EvaluationPoint {
   ply: number;
   fen: string;
+  fenBefore: string;
   move: string;
+  moveNumber: number;
+  side: 'white' | 'black';
+  player: 'white' | 'black';
+  engine: 'white' | 'black';
+  opening?: string;
+  history: string[];
   value: number;
   previousValue: number | null;
   evalChange: number;
