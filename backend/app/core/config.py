@@ -9,6 +9,21 @@ class Settings(BaseSettings):
     openai_api_key: Optional[str] = None
     openai_model: str = "gpt-5.5"
 
+    database_url: Optional[str] = None
+
+    supabase_jwt_secret: Optional[str] = None
+    auth_required: bool = False
+
+    free_ai_requests: int = 3
+
+    frontend_origin: str = "http://localhost:3000"
+
+    stripe_secret_key: Optional[str] = None
+    stripe_webhook_secret: Optional[str] = None
+    stripe_price_id: Optional[str] = None
+    billing_success_url: str = "http://localhost:3000"
+    billing_cancel_url: str = "http://localhost:3000"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         extra="ignore",

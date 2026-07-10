@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.109.0",
     "@types/chess.js": "^0.13.7",
     "axios": "^1.18.1",
     "chess.js": "^1.4.0",

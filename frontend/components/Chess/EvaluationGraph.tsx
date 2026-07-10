@@ -361,7 +361,7 @@ export default function EvaluationGraph({
         </div>
       </div>
 
-      {lastPoint && lastPoint.ply > 0 && (
+      {/* {lastPoint && lastPoint.ply > 0 && (
         <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.035] p-4">
           <div className="mb-3 flex items-start justify-between gap-3">
             <div>
@@ -436,7 +436,7 @@ export default function EvaluationGraph({
             </div>
           )}
         </div>
-      )}
+      )} */}
 
       <div className="mt-5 grid grid-cols-2 gap-4 border-t border-white/10 pt-4">
         <Stat label="Skill Level" value={skillLevel || '—'} />

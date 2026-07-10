@@ -1,13 +1,17 @@
 'use client';
 
 import { FormEvent, useMemo, useState } from 'react';
+import { AxiosError } from 'axios';
 
 import MoveBadge from '@/components/Chess/MoveBadge';
+import { BillingService } from '@/services/billing.service';
 import { CoachService } from '@/services/coach.service';
 import {
   CoachChatMessage,
   CoachExplainRequest,
   CoachExplainResponse,
+  AIUsageInfo,
+  QuotaInfo,
 } from '@/types/coach';
 import { EvaluationPoint } from '@/types/evaluation';
 import { formatEval } from '@/utils/evaluationText';
@@ -37,6 +41,14 @@ export default function CoachPanel({ point }: Props) {
     useState(false);
 
   const [isChatting, setIsChatting] = useState(false);
+
+  const [lastUsage, setLastUsage] =
+    useState<AIUsageInfo | null>(null);
+
+  const [quota, setQuota] = useState<QuotaInfo | null>(null);
+
+  const [paywallMessage, setPaywallMessage] =
+    useState<string | null>(null);
 
   const coachContext = useMemo<
     CoachExplainRequest | null
@@ -87,6 +99,11 @@ export default function CoachPanel({ point }: Props) {
         await CoachService.explainWithAI(coachContext);
 
       setCoachBrief(response);
+      setLastUsage(response.usage ?? null);
+      setQuota(response.quota ?? null);
+      setPaywallMessage(null);
+    } catch (error) {
+      handleCoachError(error, setPaywallMessage);
     } finally {
       setIsExplaining(false);
     }
@@ -124,9 +141,21 @@ export default function CoachPanel({ point }: Props) {
           content: response.answer,
         },
       ]);
+      setLastUsage(response.usage ?? null);
+      setQuota(response.quota ?? null);
+      setPaywallMessage(null);
+    } catch (error) {
+      handleCoachError(error, setPaywallMessage);
     } finally {
       setIsChatting(false);
     }
+  };
+
+  const upgrade = async () => {
+    const response =
+      await BillingService.createCheckoutSession();
+
+    window.location.href = response.url;
   };
 
   return (
@@ -313,9 +342,57 @@ export default function CoachPanel({ point }: Props) {
             {isChatting ? 'Thinking' : 'Ask'}
           </button>
         </form>
+
+        {paywallMessage && (
+          <div className="mt-4 rounded-xl border border-yellow-500/20 bg-yellow-500/10 p-3">
+            <div className="text-sm font-medium text-yellow-100">
+              {paywallMessage}
+            </div>
+
+            <button
+              onClick={upgrade}
+              className="mt-3 rounded-lg bg-violet-500 px-3 py-2 text-xs font-medium text-white transition hover:bg-violet-400"
+            >
+              Upgrade
+            </button>
+          </div>
+        )}
+
+        {(lastUsage || quota) && (
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-zinc-500">
+            {lastUsage && (
+              <span className="rounded-lg bg-white/[0.05] px-2 py-1">
+                Tokens: {lastUsage.total_tokens}
+              </span>
+            )}
+
+            {quota && (
+              <span className="rounded-lg bg-white/[0.05] px-2 py-1">
+                Free left: {quota.remaining}/{quota.limit}
+              </span>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
+}
+
+function handleCoachError(
+  error: unknown,
+  setPaywallMessage: (message: string | null) => void,
+) {
+  if (
+    error instanceof AxiosError &&
+    error.response?.status === 402
+  ) {
+    setPaywallMessage(
+      'You used your free AI coach messages.',
+    );
+    return;
+  }
+
+  throw error;
 }
 
 function TypingBubble() {

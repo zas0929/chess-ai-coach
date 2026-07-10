@@ -33,6 +33,8 @@ export interface CoachExplainResponse {
   explanation: string;
   tip: string;
   theme: string;
+  usage?: AIUsageInfo;
+  quota?: QuotaInfo;
 }
 
 export interface CoachChatMessage {
@@ -47,4 +49,19 @@ export interface CoachChatRequest {
 
 export interface CoachChatResponse {
   answer: string;
+  usage?: AIUsageInfo;
+  quota?: QuotaInfo;
+}
+
+export interface AIUsageInfo {
+  input_tokens: number;
+  output_tokens: number;
+  total_tokens: number;
+}
+
+export interface QuotaInfo {
+  used: number;
+  limit: number;
+  remaining: number;
+  enforced: boolean;
 }

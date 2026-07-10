@@ -24,11 +24,26 @@ class CoachExplainRequest(CoachContext):
     pass
 
 
+class AIUsageInfo(BaseModel):
+    input_tokens: int = 0
+    output_tokens: int = 0
+    total_tokens: int = 0
+
+
+class QuotaInfo(BaseModel):
+    used: int
+    limit: int
+    remaining: int
+    enforced: bool
+
+
 class CoachExplainResponse(BaseModel):
     title: str
     explanation: str
     tip: str
     theme: str
+    usage: Optional[AIUsageInfo] = None
+    quota: Optional[QuotaInfo] = None
 
 
 class CoachChatMessage(BaseModel):
@@ -43,3 +58,5 @@ class CoachChatRequest(BaseModel):
 
 class CoachChatResponse(BaseModel):
     answer: str
+    usage: Optional[AIUsageInfo] = None
+    quota: Optional[QuotaInfo] = None
