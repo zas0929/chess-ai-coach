@@ -253,7 +253,7 @@ export default function EvaluationGraph({
 
         {hoveredPoint && (
           <div
-            className="pointer-events-none absolute top-2 z-20 w-52 rounded-xl border border-white/10 bg-[#0b1118]/95 p-3 text-xs shadow-2xl"
+            className="pointer-events-none absolute top-2 z-[100] w-52 rounded-xl border border-white/10 bg-[#0b1118]/95 p-3 text-xs shadow-2xl"
             style={{
               left: `min(calc(${(hoveredPoint.x / CHART_WIDTH) * 100}% + 8px), calc(100% - 208px))`,
             }}

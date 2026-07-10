@@ -151,7 +151,7 @@ export default function HomePage() {
         </section>
 
         <aside className="grid content-start gap-2">
-          <Panel>
+          <Panel className="relative z-30">
             <EvaluationGraph
               values={evaluationHistory}
               currentValue={evaluation}
