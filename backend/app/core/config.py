@@ -12,6 +12,7 @@ class Settings(BaseSettings):
 
     database_url: Optional[str] = None
 
+    supabase_url: Optional[str] = None
     supabase_jwt_secret: Optional[str] = None
     auth_required: bool = False
 

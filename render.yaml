@@ -17,6 +17,8 @@ services:
         value: gpt-5.5
       - key: DATABASE_URL
         sync: false
+      - key: SUPABASE_URL
+        sync: false
       - key: SUPABASE_JWT_SECRET
         sync: false
       - key: AUTH_REQUIRED
