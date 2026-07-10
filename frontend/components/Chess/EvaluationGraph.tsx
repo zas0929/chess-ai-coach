@@ -253,12 +253,12 @@ export default function EvaluationGraph({
 
         {hoveredPoint && (
           <div
-            className="pointer-events-none absolute top-6 z-20 w-56 rounded-2xl border border-white/10 bg-[#0b1118]/95 p-4 text-sm shadow-2xl"
+            className="pointer-events-none absolute top-2 z-20 w-52 rounded-xl border border-white/10 bg-[#0b1118]/95 p-3 text-xs shadow-2xl"
             style={{
-              left: `min(calc(${(hoveredPoint.x / CHART_WIDTH) * 100}% + 10px), calc(100% - 224px))`,
+              left: `min(calc(${(hoveredPoint.x / CHART_WIDTH) * 100}% + 8px), calc(100% - 208px))`,
             }}
           >
-            <div className="mb-3 flex items-start justify-between gap-3">
+            <div className="mb-2 flex items-start justify-between gap-3">
               <div className="font-medium text-zinc-100">
                 Move {hoveredPoint.ply}. {hoveredPoint.move}
               </div>
@@ -279,7 +279,7 @@ export default function EvaluationGraph({
               small
             />
 
-            <div className="mt-3 text-sm text-zinc-400">
+            <div className="mt-2 text-xs text-zinc-400">
               {hoveredPoint.evalChange > 0
                 ? 'Evaluation improved.'
                 : hoveredPoint.evalChange < 0
@@ -288,7 +288,7 @@ export default function EvaluationGraph({
             </div>
 
             {hoveredPoint.bestMove && (
-              <div className="mt-3 rounded-xl bg-white/[0.04] p-3 text-xs">
+              <div className="mt-2 rounded-lg bg-white/[0.04] px-2 py-1.5">
                 <div className="flex justify-between">
                   <span className="text-zinc-500">Best:</span>
                   <span className="font-medium text-green-400">
@@ -298,7 +298,7 @@ export default function EvaluationGraph({
               </div>
             )}
 
-            <div className="mt-3 text-sm text-zinc-400">
+            <div className="mt-2 text-xs text-zinc-400">
               {getEvalSideText(hoveredPoint.value)}
             </div>
 
@@ -309,7 +309,7 @@ export default function EvaluationGraph({
               )}
             </div>
 
-            <div className="mt-3 rounded-xl bg-white/[0.04] p-3 text-xs text-zinc-400">
+            <div className="mt-2 rounded-lg bg-white/[0.04] px-2 py-1.5 text-xs text-zinc-400">
               <div className="mt-1 flex justify-between">
                 <span>Change:</span>
                 <span

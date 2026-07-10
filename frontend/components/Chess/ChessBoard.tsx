@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import { Chessboard } from 'react-chessboard';
 import { Square } from 'chess.js';
 
@@ -40,6 +41,32 @@ export default function ChessBoard({
   checkedKingSquare,
   isCheckmate,
 }: Props) {
+  const boardRef = useRef<HTMLDivElement | null>(null);
+  const [boardWidth, setBoardWidth] = useState(650);
+
+  useEffect(() => {
+    const node = boardRef.current;
+
+    if (!node) {
+      return;
+    }
+
+    const updateBoardWidth = () => {
+      const nextWidth = Math.floor(node.getBoundingClientRect().width);
+
+      if (nextWidth > 0) {
+        setBoardWidth(nextWidth);
+      }
+    };
+
+    updateBoardWidth();
+
+    const resizeObserver = new ResizeObserver(updateBoardWidth);
+    resizeObserver.observe(node);
+
+    return () => resizeObserver.disconnect();
+  }, []);
+
   const customSquareStyles = {
     ...(checkedKingSquare
     ? {
@@ -89,13 +116,15 @@ export default function ChessBoard({
   };
 
   return (
-    <Chessboard
-      boardOrientation={boardOrientation}
-      position={position}
-      onPieceDrop={onDrop}
-      onSquareClick={onSquareClick}
-      customSquareStyles={customSquareStyles}
-      boardWidth={650}
-    />
+    <div ref={boardRef} className="w-full">
+      <Chessboard
+        boardOrientation={boardOrientation}
+        position={position}
+        onPieceDrop={onDrop}
+        onSquareClick={onSquareClick}
+        customSquareStyles={customSquareStyles}
+        boardWidth={boardWidth}
+      />
+    </div>
   );
 }

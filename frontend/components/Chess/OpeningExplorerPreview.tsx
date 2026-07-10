@@ -87,42 +87,42 @@ export default function OpeningExplorerPreview({
       : 'Waiting';
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-2 shadow-lg">
-      <div className="mb-1.5 flex items-center justify-between gap-3">
-        <h2 className="text-[11px] font-semibold uppercase tracking-widest text-zinc-300">
+    <div className="rounded-2xl border border-white/10 bg-white/[0.04] px-3 py-1.5 shadow-lg">
+      <div className="mb-1 flex items-center justify-between gap-3">
+        <h2 className="text-[10px] font-semibold uppercase tracking-widest text-zinc-300">
           Opening Explorer
         </h2>
 
-        <div className="shrink-0 text-[11px] text-zinc-500">
+        <div className="shrink-0 text-[10px] text-zinc-500">
           {metaLabel}
         </div>
       </div>
 
-      <div className="min-w-0">
-        <div className="truncate text-sm font-medium text-zinc-100">
+      <div className="flex min-w-0 items-center justify-between gap-3">
+        <div className="truncate text-sm font-medium leading-5 text-zinc-100">
           {opening ??
             (hasMoves
               ? 'Book line pending'
               : 'Play first moves')}
         </div>
-      </div>
 
-      <div className="mt-1.5 grid grid-cols-3 gap-2 text-[11px]">
-        <OpeningStat
-          label="White"
-          value={stats?.white}
-          tone="green"
-        />
-        <OpeningStat
-          label="Draw"
-          value={stats?.draw}
-          tone="neutral"
-        />
-        <OpeningStat
-          label="Black"
-          value={stats?.black}
-          tone="red"
-        />
+        <div className="grid w-[52%] shrink-0 grid-cols-3 gap-1.5 text-[10px]">
+          <OpeningStat
+            label="W"
+            value={stats?.white}
+            tone="green"
+          />
+          <OpeningStat
+            label="D"
+            value={stats?.draw}
+            tone="neutral"
+          />
+          <OpeningStat
+            label="B"
+            value={stats?.black}
+            tone="red"
+          />
+        </div>
       </div>
     </div>
   );
@@ -149,7 +149,7 @@ function OpeningStat({
 
   return (
     <div>
-      <div className="mb-0.5 flex items-center justify-between">
+      <div className="mb-0.5 flex items-center justify-between gap-1">
         <span className="text-zinc-400">{label}</span>
         <span
           className={[
@@ -165,7 +165,7 @@ function OpeningStat({
         </span>
       </div>
 
-      <div className="h-1 overflow-hidden rounded-full bg-white/10">
+      <div className="h-0.5 overflow-hidden rounded-full bg-white/10">
         <div
           className={`h-full rounded-full ${barColor}`}
           style={{ width: hasValue ? `${value}%` : '100%' }}

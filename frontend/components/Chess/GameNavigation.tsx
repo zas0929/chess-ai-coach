@@ -37,13 +37,13 @@ export default function GameNavigation({
     'border-violet-400/40 bg-violet-500/20 text-white';
 
   return (
-    <div className="flex flex-col gap-1.5">
-      <div className="flex items-center gap-1">
-        <div className="flex min-w-0 flex-1 items-center gap-1">
-          <span className="mr-0.5 text-[10px] uppercase tracking-widest text-zinc-500">
+    <div className="grid gap-1.5">
+      <div className="grid grid-cols-[auto_1fr_auto] items-center gap-1.5">
+        <span className="text-[10px] uppercase tracking-widest text-zinc-500">
             Side
-          </span>
+        </span>
 
+        <div className="grid grid-cols-3 gap-1">
           <button
             onClick={() => onChooseSide('white')}
             title="Play as White"
@@ -87,8 +87,8 @@ export default function GameNavigation({
         </button>
       </div>
 
-      <div className="flex items-center gap-1">
-        <div className="flex items-center gap-1">
+      <div className="grid grid-cols-[1fr_auto] items-center gap-1.5">
+        <div className="grid grid-cols-[28px_28px_minmax(48px,1fr)_28px_28px] gap-1">
           <button
             onClick={onFirst}
             disabled={currentPly === 0}
@@ -130,11 +130,11 @@ export default function GameNavigation({
           </button>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="grid grid-cols-2 gap-1">
           <button
             onClick={onUndo}
             title="Undo move"
-            className={[buttonClass, 'gap-1 px-2'].join(' ')}
+            className={[buttonClass, 'gap-1 px-2.5'].join(' ')}
           >
             <span>↩</span>
             <span>Undo</span>
@@ -143,7 +143,7 @@ export default function GameNavigation({
           <button
             onClick={onFlipBoard}
             title="Flip board"
-            className={[buttonClass, 'gap-1 px-2'].join(' ')}
+            className={[buttonClass, 'gap-1 px-2.5'].join(' ')}
           >
             <span>↻</span>
             <span>Flip</span>

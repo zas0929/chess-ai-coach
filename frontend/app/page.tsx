@@ -114,9 +114,14 @@ export default function HomePage() {
   return (
     <AuthGate>
       <AppShell point={selectedCoachPoint}>
-      <div className="grid grid-cols-[minmax(680px,1fr)_420px] gap-5">
+      <div className="grid grid-cols-[minmax(520px,1fr)_420px] gap-5">
         <section className="flex min-w-0 justify-center">
-          <div className="w-full max-w-[650px]">
+          <div
+            className="w-full"
+            style={{
+              maxWidth: 'min(760px, calc(100vh - 210px))',
+            }}
+          >
             <div className="mb-2 grid grid-cols-2 gap-2">
               <OpeningExplorerPreview
                 opening={currentOpening}

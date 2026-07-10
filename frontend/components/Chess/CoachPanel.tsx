@@ -80,7 +80,7 @@ export default function CoachPanel({ point }: Props) {
       <div>
         <SectionTitle />
 
-        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm text-zinc-400">
+        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-sm text-zinc-400">
           Play your first move to start the analysis.
         </div>
       </div>
@@ -164,17 +164,17 @@ export default function CoachPanel({ point }: Props) {
 
       <div
         className={[
-          'rounded-2xl border p-4',
+          'rounded-2xl border p-3',
           severityClass[coach.severity],
         ].join(' ')}
       >
-        <div className="mb-3 flex items-center justify-between gap-3">
+        <div className="mb-2 flex items-center justify-between gap-3">
           <div>
             <div className="text-xs uppercase tracking-widest text-zinc-500">
               Move {point.ply}
             </div>
 
-            <div className="mt-1 text-2xl font-semibold text-white">
+            <div className="mt-0.5 text-xl font-semibold text-white">
               {point.move}
             </div>
           </div>
@@ -185,21 +185,21 @@ export default function CoachPanel({ point }: Props) {
           />
         </div>
 
-        <div className="mt-4 text-lg font-semibold text-white">
+        <div className="mt-3 text-base font-semibold text-white">
           {coach.title}
         </div>
 
-        <div className="mt-2 text-sm leading-6 text-zinc-300">
+        <div className="mt-1.5 text-sm leading-5 text-zinc-300">
           {coach.explanation}
         </div>
       </div>
 
-      <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+      <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
         <div className="text-xs uppercase tracking-widest text-zinc-500">
           Evaluation
         </div>
 
-        <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
+        <div className="mt-2 grid grid-cols-3 gap-2 text-xs">
           <MiniStat
             label="Before"
             value={
@@ -224,35 +224,35 @@ export default function CoachPanel({ point }: Props) {
       </div>
 
       {point.bestMove && (
-        <div className="mt-4 rounded-2xl border border-green-500/20 bg-green-500/10 p-4">
+        <div className="mt-3 rounded-2xl border border-green-500/20 bg-green-500/10 p-3">
           <div className="text-xs uppercase tracking-widest text-green-300">
             Best Move
           </div>
 
-          <div className="mt-2 text-xl font-semibold text-green-300">
+          <div className="mt-1.5 text-lg font-semibold text-green-300">
             {point.bestMove}
           </div>
         </div>
       )}
 
-      <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+      <div className="mt-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3">
         <div className="text-xs uppercase tracking-widest text-zinc-500">
           Coach Tip
         </div>
 
-        <div className="mt-3 text-sm leading-6 text-zinc-300">
+        <div className="mt-2 text-sm leading-5 text-zinc-300">
           {coach.tip}
         </div>
       </div>
 
-      <div className="mt-5 rounded-2xl border border-violet-500/20 bg-violet-500/10 p-4">
+      <div className="mt-3 rounded-2xl border border-violet-500/20 bg-violet-500/10 p-3">
         <div className="flex items-center justify-between gap-3">
           <div>
             <div className="text-xs uppercase tracking-widest text-violet-300">
               Chat with Coach
             </div>
 
-            <div className="mt-1 text-sm text-zinc-400">
+            <div className="mt-1 text-xs leading-5 text-zinc-400">
               Ask about ideas, alternatives, traps, or plans.
             </div>
           </div>
@@ -261,7 +261,7 @@ export default function CoachPanel({ point }: Props) {
             <button
               onClick={startCoachChat}
               disabled={isExplaining}
-              className="inline-flex items-center gap-2 rounded-xl border border-violet-400/30 bg-violet-400/10 px-3 py-2 text-xs font-medium text-violet-200 transition hover:bg-violet-400/20 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-lg border border-violet-400/30 bg-violet-400/10 px-3 py-1.5 text-xs font-medium text-violet-200 transition hover:bg-violet-400/20 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isExplaining && (
                 <span className="h-3 w-3 animate-spin rounded-full border border-violet-200/30 border-t-violet-200" />
@@ -272,7 +272,7 @@ export default function CoachPanel({ point }: Props) {
         </div>
 
         {coachBrief && (
-          <div className="mt-4 rounded-xl border border-white/10 bg-[#0b1118]/50 p-3">
+          <div className="mt-3 rounded-xl border border-white/10 bg-[#0b1118]/50 p-3">
             <div className="flex items-center justify-between gap-3">
               <div className="text-sm font-semibold text-white">
                 {coachBrief.title}
@@ -283,7 +283,7 @@ export default function CoachPanel({ point }: Props) {
               </div>
             </div>
 
-            <div className="mt-2 text-sm leading-6 text-zinc-300">
+            <div className="mt-2 text-sm leading-5 text-zinc-300">
               {coachBrief.explanation}
             </div>
 
@@ -294,12 +294,12 @@ export default function CoachPanel({ point }: Props) {
         )}
 
         {chatMessages.length > 0 && (
-          <div className="mt-4 max-h-64 space-y-3 overflow-auto pr-1">
+          <div className="mt-3 max-h-56 space-y-2 overflow-auto pr-1">
             {chatMessages.map((message, index) => (
               <div
                 key={`${message.role}-${index}`}
                 className={[
-                  'rounded-xl px-3 py-2 text-sm leading-6',
+                  'rounded-xl px-3 py-2 text-sm leading-5',
                   message.role === 'user'
                     ? 'ml-6 bg-white/10 text-zinc-100'
                     : 'mr-6 bg-[#0b1118]/60 text-zinc-300',
@@ -314,14 +314,14 @@ export default function CoachPanel({ point }: Props) {
         )}
 
         {chatMessages.length === 0 && isChatting && (
-          <div className="mt-4">
+          <div className="mt-3">
             <TypingBubble />
           </div>
         )}
 
         <form
           onSubmit={sendMessage}
-          className="mt-4 flex gap-2"
+          className="mt-3 flex gap-2"
         >
           <input
             value={draftMessage}
@@ -329,12 +329,12 @@ export default function CoachPanel({ point }: Props) {
               setDraftMessage(event.target.value)
             }
             placeholder="Ask anything..."
-            className="min-w-0 flex-1 rounded-xl border border-white/10 bg-[#0b1118] px-3 py-2 text-sm text-zinc-100 outline-none transition placeholder:text-zinc-600 focus:border-violet-400/60"
+            className="min-w-0 flex-1 rounded-lg border border-white/10 bg-[#0b1118] px-3 py-1.5 text-sm text-zinc-100 outline-none transition placeholder:text-zinc-600 focus:border-violet-400/60"
           />
 
           <button
             disabled={isChatting || !draftMessage.trim()}
-            className="inline-flex items-center justify-center gap-2 rounded-xl border border-violet-400/30 bg-violet-400/15 px-4 py-2 text-sm font-medium text-violet-200 transition hover:bg-violet-400/25 disabled:cursor-not-allowed disabled:opacity-60"
+            className="inline-flex items-center justify-center gap-2 rounded-lg border border-violet-400/30 bg-violet-400/15 px-3 py-1.5 text-sm font-medium text-violet-200 transition hover:bg-violet-400/25 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isChatting && (
               <span className="h-4 w-4 animate-spin rounded-full border border-violet-200/30 border-t-violet-200" />
@@ -344,7 +344,7 @@ export default function CoachPanel({ point }: Props) {
         </form>
 
         {paywallMessage && (
-          <div className="mt-4 rounded-xl border border-yellow-500/20 bg-yellow-500/10 p-3">
+          <div className="mt-3 rounded-xl border border-yellow-500/20 bg-yellow-500/10 p-3">
             <div className="text-sm font-medium text-yellow-100">
               {paywallMessage}
             </div>
@@ -397,7 +397,7 @@ function handleCoachError(
 
 function TypingBubble() {
   return (
-    <div className="mr-6 flex items-center gap-3 rounded-xl bg-[#0b1118]/60 px-3 py-3 text-sm text-zinc-300">
+    <div className="mr-6 flex items-center gap-2 rounded-xl bg-[#0b1118]/60 px-3 py-2 text-sm text-zinc-300">
       <span className="h-4 w-4 animate-spin rounded-full border border-violet-300/30 border-t-violet-300" />
       <span>Coach is thinking</span>
       <span className="flex gap-1">
@@ -411,12 +411,12 @@ function TypingBubble() {
 
 function SectionTitle() {
   return (
-    <div className="mb-5">
+    <div className="mb-4">
       <div className="text-xs uppercase tracking-[0.25em] text-zinc-500">
         AI Coach
       </div>
 
-      <div className="mt-2 text-2xl font-semibold text-white">
+      <div className="mt-1.5 text-xl font-semibold text-white">
         Your Assistant
       </div>
     </div>
@@ -433,7 +433,7 @@ function MiniStat({
   tone?: 'positive' | 'negative';
 }) {
   return (
-    <div className="rounded-xl bg-white/[0.04] px-3 py-2">
+    <div className="rounded-lg bg-white/[0.04] px-2.5 py-2">
       <div className="text-[11px] text-zinc-500">
         {label}
       </div>
