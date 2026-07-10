@@ -105,29 +105,31 @@ export default function HomePage() {
     <AuthGate>
       <AppShell point={selectedCoachPoint}>
       <div className="grid grid-cols-[minmax(680px,1fr)_420px] gap-5">
-        <section className="min-w-0">
+        <section className="flex min-w-0 justify-center">
           {/* <div className="mb-4 grid grid-cols-2 gap-4">
             <OpeningExplorerPreview />
             <GameTimeline moveCount={moves.length} />
           </div> */}
 
-          <CapturedPieces {...bottomCaptured} />
+          <div className="w-full max-w-[650px]">
+            <CapturedPieces {...bottomCaptured} />
 
-          <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] shadow-2xl">
-            <ChessBoard
-              position={displayedFen}
-              boardOrientation={boardOrientation}
-              onDrop={onDrop}
-              lastMove={lastMove}
-              onSquareClick={selectPiece}
-              possibleMoves={possibleMoves}
-              selectedSquare={selectedSquare}
-              checkedKingSquare={checkedKingSquare}
-              isCheckmate={isCheckmate}
-            />
+            <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] shadow-2xl">
+              <ChessBoard
+                position={displayedFen}
+                boardOrientation={boardOrientation}
+                onDrop={onDrop}
+                lastMove={lastMove}
+                onSquareClick={selectPiece}
+                possibleMoves={possibleMoves}
+                selectedSquare={selectedSquare}
+                checkedKingSquare={checkedKingSquare}
+                isCheckmate={isCheckmate}
+              />
+            </div>
+
+            <CapturedPieces {...topCaptured} />
           </div>
-
-          <CapturedPieces {...topCaptured} />
         </section>
 
         <aside className="grid content-start gap-2">

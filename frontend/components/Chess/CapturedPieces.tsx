@@ -36,16 +36,19 @@ export default function CapturedPieces({
   advantage = 0,
 }: Props) {
   return (
-    <div className="mb-3 flex min-h-14 items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-3 shadow-xl">
-      <div className="flex items-center gap-5">
-        <span className="w-12 text-sm text-zinc-300">
+    <div className="my-2 flex h-10 items-center justify-between rounded-2xl border border-white/10 bg-white/[0.04] px-4 shadow-lg">
+      <div className="flex min-w-0 items-center gap-3">
+        <span className="w-12 shrink-0 text-sm text-zinc-300">
           {label}
         </span>
 
-        <div className="flex items-center gap-1 text-3xl leading-none">
+        <div className="flex min-w-0 items-center gap-0.5 overflow-hidden text-2xl leading-none">
           {pieces.length > 0 ? (
             pieces.map((piece, index) => (
-              <span key={`${piece}-${index}`}>
+              <span
+                key={`${piece}-${index}`}
+                className="-mr-0.5 shrink-0"
+              >
                 {pieceSymbols[color][piece]}
               </span>
             ))
@@ -56,7 +59,7 @@ export default function CapturedPieces({
       </div>
 
       {advantage > 0 && (
-        <div className="rounded-lg bg-emerald-500/10 px-3 py-1 text-sm font-semibold text-emerald-300">
+        <div className="ml-3 shrink-0 rounded-lg bg-emerald-500/10 px-2.5 py-1 text-xs font-semibold text-emerald-300">
           +{advantage}
         </div>
       )}
