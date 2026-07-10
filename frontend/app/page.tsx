@@ -1,5 +1,6 @@
 'use client';
 
+import AuthGate from '@/components/Auth/AuthGate';
 import ChessBoard from '@/components/Chess/ChessBoard';
 import MoveHistory from '@/components/Chess/MoveHistory';
 import { useChessGame } from '@/hooks/useChessGame';
@@ -103,7 +104,8 @@ export default function HomePage() {
         };
 
   return (
-    <AppShell point={selectedCoachPoint}>
+    <AuthGate>
+      <AppShell point={selectedCoachPoint}>
       <div className="grid grid-cols-[minmax(680px,1fr)_420px] gap-5">
         <section className="min-w-0">
           <TopGameBar
@@ -187,6 +189,7 @@ export default function HomePage() {
 
         </aside>
       </div>
-    </AppShell>
+      </AppShell>
+    </AuthGate>
   );
 }
