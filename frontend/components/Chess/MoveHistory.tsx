@@ -1,3 +1,7 @@
+'use client';
+
+import { useEffect, useRef } from 'react';
+
 import { EvaluationPoint } from '@/types/evaluation';
 import MoveBadge from '@/components/Chess/MoveBadge';
 
@@ -10,6 +14,8 @@ export default function MoveHistory({
   moves,
   evaluationHistory,
 }: Props) {
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
   const movePoints = evaluationHistory.filter(
     (point) => point.ply > 0,
   );
@@ -32,6 +38,19 @@ export default function MoveHistory({
       },
     });
   }
+
+  useEffect(() => {
+    const scrollNode = scrollRef.current;
+
+    if (!scrollNode) {
+      return;
+    }
+
+    scrollNode.scrollTo({
+      top: scrollNode.scrollHeight,
+      behavior: 'smooth',
+    });
+  }, [moves.length]);
 
   return (
     <div>
@@ -56,7 +75,10 @@ export default function MoveHistory({
         <span>Black</span>
       </div>
 
-      <div className="max-h-[360px] space-y-1 overflow-auto pr-2">
+      <div
+        ref={scrollRef}
+        className="max-h-[360px] space-y-1 overflow-auto pr-2"
+      >
         {rows.map((row) => (
           <div
             key={row.number}
@@ -69,11 +91,13 @@ export default function MoveHistory({
             <MoveCell
               san={row.white.san}
               point={row.white.point}
+              side="white"
             />
 
             <MoveCell
               san={row.black.san}
               point={row.black.point}
+              side="black"
             />
           </div>
         ))}
@@ -85,24 +109,69 @@ export default function MoveHistory({
 function MoveCell({
   san,
   point,
+  side,
 }: {
   san: string;
   point?: EvaluationPoint;
+  side: 'white' | 'black';
 }) {
   if (!san) {
     return <span />;
   }
 
   return (
-    <div className="flex min-h-8 min-w-0 items-center gap-2 rounded-lg px-2 py-1">
-      <span className="truncate font-medium text-zinc-100">
-        {san}
+    <div className="grid min-h-8 min-w-0 grid-cols-[76px_minmax(96px,1fr)] items-center gap-2 rounded-lg px-2 py-1">
+      <span className="flex min-w-0 items-center gap-1.5">
+        <span
+          className={[
+            'w-4 shrink-0 text-center text-base leading-none',
+            side === 'white' ? 'text-zinc-100' : 'text-zinc-500',
+          ].join(' ')}
+        >
+          {getMovePieceIcon(san)}
+        </span>
+        <span className="truncate font-medium tabular-nums text-zinc-100">
+          {san}
+        </span>
       </span>
 
-      <MoveBadge
-        classification={point?.classification}
-        small
-      />
+      <span className="flex min-w-0 justify-start">
+        <MoveBadge
+          classification={point?.classification}
+          small
+        />
+      </span>
     </div>
   );
+}
+
+function getMovePieceIcon(san: string) {
+  const normalized = san.replace(/[+#?!]+$/g, '');
+
+  if (normalized.startsWith('O-O')) {
+    return '♚';
+  }
+
+  const piece = normalized[0];
+
+  const icons = {
+    K: '♚',
+    Q: '♛',
+    R: '♜',
+    B: '♝',
+    N: '♞',
+    P: '♟',
+  };
+
+  if (
+    piece === 'K' ||
+    piece === 'Q' ||
+    piece === 'R' ||
+    piece === 'B' ||
+    piece === 'N'
+  ) {
+    return icons[piece];
+  }
+
+  return icons.P;
 }
