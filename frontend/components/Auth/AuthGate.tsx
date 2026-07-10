@@ -1,6 +1,13 @@
 'use client';
 
-import { ReactNode, useEffect, useState } from 'react';
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { Session } from '@supabase/supabase-js';
 
 import { api } from '@/lib/api';
@@ -14,6 +21,22 @@ interface Props {
 }
 
 type AuthMode = 'login' | 'register';
+
+interface AuthContextValue {
+  session: Session | null;
+  isConfigured: boolean;
+  signOut: () => void;
+}
+
+const AuthContext = createContext<AuthContextValue>({
+  session: null,
+  isConfigured: false,
+  signOut: () => {},
+});
+
+export function useAuth() {
+  return useContext(AuthContext);
+}
 
 export default function AuthGate({ children }: Props) {
   const [session, setSession] = useState<Session | null>(null);
@@ -54,8 +77,23 @@ export default function AuthGate({ children }: Props) {
     delete api.defaults.headers.common.Authorization;
   }, [session]);
 
+  const authContextValue = useMemo<AuthContextValue>(
+    () => ({
+      session,
+      isConfigured: isSupabaseConfigured,
+      signOut: () => {
+        void supabase?.auth.signOut();
+      },
+    }),
+    [session],
+  );
+
   if (!isSupabaseConfigured) {
-    return <>{children}</>;
+    return (
+      <AuthContext.Provider value={authContextValue}>
+        {children}
+      </AuthContext.Provider>
+    );
   }
 
   if (isLoading) {
@@ -167,17 +205,8 @@ export default function AuthGate({ children }: Props) {
   }
 
   return (
-    <>
-      <div className="fixed right-4 top-4 z-50 flex items-center gap-3 rounded-xl border border-white/10 bg-[#0b1118]/90 px-3 py-2 text-xs text-zinc-300 shadow-xl">
-        <span>{session.user.email}</span>
-        <button
-          onClick={() => supabase?.auth.signOut()}
-          className="text-violet-300 transition hover:text-violet-100"
-        >
-          Sign out
-        </button>
-      </div>
+    <AuthContext.Provider value={authContextValue}>
       {children}
-    </>
+    </AuthContext.Provider>
   );
 }
