@@ -1,15 +1,33 @@
-const sounds = {
-  move: new Audio('/sounds/move.mp3'),
-  capture: new Audio('/sounds/capture.mp3'),
-  check: new Audio('/sounds/check.mp3'),
-  checkmate: new Audio('/sounds/checkmate.mp3'),
-  start: new Audio('/sounds/start.mp3'),
-  undo: new Audio('/sounds/undo.mp3'),
+const soundFiles = {
+  move: '/sounds/move.mp3',
+  capture: '/sounds/capture.mp3',
+  check: '/sounds/check.mp3',
+  checkmate: '/sounds/check.mp3',
+  start: '/sounds/start.mp3',
+  undo: '/sounds/move.mp3',
 };
 
+type SoundName = keyof typeof soundFiles;
+
+const sounds: Partial<Record<SoundName, HTMLAudioElement>> = {};
+
+function getSound(name: SoundName) {
+  if (typeof Audio === 'undefined') {
+    return null;
+  }
+
+  sounds[name] ??= new Audio(soundFiles[name]);
+
+  return sounds[name] ?? null;
+}
+
 export const SoundService = {
-  play(name: keyof typeof sounds) {
-    const sound = sounds[name];
+  play(name: SoundName) {
+    const sound = getSound(name);
+
+    if (!sound) {
+      return;
+    }
 
     sound.currentTime = 0;
 

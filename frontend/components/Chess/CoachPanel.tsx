@@ -19,6 +19,12 @@ const severityClass = {
 };
 
 export default function CoachPanel({ point }: Props) {
+  const [aiExplanation, setAiExplanation] =
+    useState<string | null>(null);
+
+  const [isExplaining, setIsExplaining] =
+    useState(false);
+
   if (!point || point.ply === 0) {
     return (
       <div>
@@ -32,12 +38,6 @@ export default function CoachPanel({ point }: Props) {
   }
 
   const coach = CoachService.explain(point);
-
-  const [aiExplanation, setAiExplanation] =
-  useState<string | null>(null);
-
-  const [isExplaining, setIsExplaining] =
-    useState(false);
 
   const explainMove = async () => {
     if (!point) return;

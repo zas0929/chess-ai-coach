@@ -9,7 +9,7 @@ interface Props {
   onDrop: (
     sourceSquare: Square,
     targetSquare: Square,
-  ) => Promise<boolean>;
+  ) => boolean;
 
   onSquareClick: (square: Square) => void;
 

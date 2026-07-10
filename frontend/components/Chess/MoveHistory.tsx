@@ -1,43 +1,10 @@
-import { EvaluationPoint, MoveClassification } from '@/types/evaluation';
+import { EvaluationPoint } from '@/types/evaluation';
 import MoveBadge from '@/components/Chess/MoveBadge';
 
 interface Props {
   moves: string[];
   evaluationHistory: EvaluationPoint[];
 }
-
-const classificationMeta: Record<
-  MoveClassification,
-  {
-    label: string;
-    dotClass: string;
-  }
-> = {
-  best: {
-    label: 'Best',
-    dotClass: 'bg-cyan-400',
-  },
-  excellent: {
-    label: 'Excellent',
-    dotClass: 'bg-emerald-400',
-  },
-  good: {
-    label: 'Good',
-    dotClass: 'bg-green-500',
-  },
-  inaccuracy: {
-    label: 'Inaccuracy',
-    dotClass: 'bg-yellow-400',
-  },
-  mistake: {
-    label: 'Mistake',
-    dotClass: 'bg-orange-400',
-  },
-  blunder: {
-    label: 'Blunder',
-    dotClass: 'bg-red-500',
-  },
-};
 
 export default function MoveHistory({
   moves,
@@ -76,7 +43,7 @@ export default function MoveHistory({
         {rows.map((row) => (
           <div
             key={row.number}
-            className="grid grid-cols-[36px_1fr_1fr] gap-2 rounded-xl px-2 py-1.5 text-sm hover:bg-white/[0.05]"
+            className="grid grid-cols-[36px_minmax(0,1fr)_minmax(0,1fr)] gap-2 rounded-xl px-2 py-1.5 text-sm hover:bg-white/[0.05]"
           >
             <span className="text-zinc-500">
               {row.number}.
@@ -109,11 +76,6 @@ function MoveCell({
     return <span />;
   }
 
-  const classification = point?.classification;
-  const meta = classification
-    ? classificationMeta[classification]
-    : null;
-
   return (
     <div className="flex min-w-0 items-center gap-2 rounded-lg px-2 py-1">
       <span className="truncate font-medium text-zinc-100">
@@ -121,15 +83,9 @@ function MoveCell({
       </span>
 
       <MoveBadge
-          classification={point?.classification}
-          small
+        classification={point?.classification}
+        small
       />
-
-      {meta && (
-        <span className="hidden truncate text-xs text-zinc-500 2xl:inline">
-          {meta.label}
-        </span>
-      )}
     </div>
   );
 }

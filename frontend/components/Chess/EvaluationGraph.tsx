@@ -18,7 +18,6 @@ interface Props {
   moveTime?: number;
   skillLevel?: number;
   previousValue?: number;
-  evalChange?: number;
   lastPoint?: EvaluationPoint;
 }
 
@@ -34,28 +33,6 @@ function clamp(value: number) {
   return Math.max(-MAX_EVAL, Math.min(MAX_EVAL, value));
 }
 
-function classifyMove(value: number) {
-  const abs = Math.abs(value);
-
-  if (abs >= 3) return 'Critical';
-  if (abs >= 1.5) return 'Advantage';
-  if (abs >= 0.5) return 'Slight edge';
-
-  return 'Equal';
-}
-
-function formatClassification(
-  classification?: string,
-) {
-  if (!classification) return 'Position';
-
-  return classification
-    .replace('-', ' ')
-    .replace(/\b\w/g, (char) =>
-      char.toUpperCase(),
-    );
-}
-
 export default function EvaluationGraph({
   values,
   currentValue,
@@ -64,15 +41,27 @@ export default function EvaluationGraph({
   moveTime = 0,
   skillLevel = 0,
   lastPoint,
-  evalChange = 0,
 }: Props) {
   const [hoveredIndex, setHoveredIndex] =
     useState<number | null>(null);
 
-  const normalizedValues =
-    values.length > 0
-      ? values
-      : [{ ply: 0, fen: '', move: 'start', value: 0, source: 'engine' as const }];
+  const normalizedValues = useMemo(
+    () =>
+      values.length > 0
+        ? values
+        : [
+            {
+              ply: 0,
+              fen: '',
+              move: 'start',
+              value: 0,
+              previousValue: null,
+              evalChange: 0,
+              source: 'engine' as const,
+            },
+          ],
+    [values],
+  );
 
       const points = useMemo(
         () =>
@@ -107,7 +96,11 @@ export default function EvaluationGraph({
   const hoveredPoint =
     hoveredIndex !== null ? points[hoveredIndex] : null;
 
-  const activePoint = hoveredPoint ?? lastPoint;
+  const activeChartPoint =
+    hoveredPoint ??
+    (lastPoint
+      ? points.find((point) => point.ply === lastPoint.ply)
+      : null);
 
   const isWhiteBetter = currentValue > 0;
   const isBlackBetter = currentValue < 0;
@@ -236,19 +229,19 @@ export default function EvaluationGraph({
             strokeLinejoin="round"
           />
 
-          {activePoint && (
+          {activeChartPoint && (
             <>
               <line
-                x1={activePoint.x}
-                x2={activePoint.x}
+                x1={activeChartPoint.x}
+                x2={activeChartPoint.x}
                 y1={0}
                 y2={CHART_HEIGHT}
                 stroke="rgba(255,255,255,0.45)"
               />
 
               <circle
-                cx={activePoint.x}
-                cy={activePoint.y}
+                cx={activeChartPoint.x}
+                cy={activeChartPoint.y}
                 r={4}
                 fill="#0b1118"
                 stroke="white"

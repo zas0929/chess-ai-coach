@@ -1,4 +1,4 @@
-import { CapturedPiece } from '@/utils/chess/material';
+import { CapturedPiece } from '@/utils/material';
 
 interface Props {
   label: string;

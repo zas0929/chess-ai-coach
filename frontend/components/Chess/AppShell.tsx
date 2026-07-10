@@ -4,7 +4,7 @@ import { EvaluationPoint } from '@/types/evaluation';
 
 interface Props {
   children: ReactNode;
-  point: null;
+  point?: EvaluationPoint;
 }
 
 export default function AppShell({ children, point }: Props) {

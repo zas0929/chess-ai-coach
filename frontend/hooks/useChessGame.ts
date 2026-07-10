@@ -1,18 +1,16 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Chess, Square } from 'chess.js';
 
 import { EngineService } from '@/services/engine.service';
 import { SoundService } from '@/services/sound.service';
-import { ToastService } from '@/services/toast.service';
 import { getMaterialState } from '@/utils/material';
 import { EvaluationPoint } from '@/types/evaluation';
 import { classifyMoveByEvalDrop } from '@/utils/classifyMove';
+import { EngineStats } from '@/types/engine';
 
 export function useChessGame() {
   // Один экземпляр игры на весь жизненный цикл компонента
-  const gameRef = useRef(new Chess());
-
-  const game = gameRef.current;
+  const [game] = useState(() => new Chess());
 
   const [fen, setFen] = useState(game.fen());
 
@@ -35,9 +33,11 @@ export function useChessGame() {
 
   const [turn, setTurn] = useState(game.turn());
 
-  const [engineStats, setEngineStats] = useState({
+  const [engineStats, setEngineStats] = useState<EngineStats>({
     time: 0,
     skill_level: 10,
+    depth: 12,
+    move_time: 500,
   });
 
   const [playerColor, setPlayerColor] = useState<'white' | 'black'>('white');
@@ -388,7 +388,7 @@ const chooseSide = useCallback(
   );
 
   const onDrop = useCallback(
-    async (
+    (
       sourceSquare: Square,
       targetSquare: Square,
       ) => {
@@ -433,24 +433,36 @@ const chooseSide = useCallback(
       updateState();
 
       const fenAfterPlayerMove = game.fen();
-        
-      await analyzePlayerMove(
-        fenBeforePlayerMove,
-        fenAfterPlayerMove,
-      );
 
-      if (game.isGameOver()) {
-        return true;
-      }
+      setThinking(true);
 
-      await makeEngineMove();
+      void (async () => {
+        try {
+          await analyzePlayerMove(
+            fenBeforePlayerMove,
+            fenAfterPlayerMove,
+          );
+
+          if (game.isGameOver()) {
+            return;
+          }
+
+          await makeEngineMove();
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setThinking(false);
+        }
+      })();
 
       return true;
     },
   [
     game,
     thinking,
+    isLivePosition,
     updateState,
+    analyzePlayerMove,
     makeEngineMove,
   ],
   );

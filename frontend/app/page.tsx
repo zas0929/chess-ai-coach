@@ -1,7 +1,6 @@
 'use client';
 
 import ChessBoard from '@/components/Chess/ChessBoard';
-import EvaluationBar from '@/components/Chess/EvaluationBar';
 import MoveHistory from '@/components/Chess/MoveHistory';
 import { useChessGame } from '@/hooks/useChessGame';
 import CapturedPieces from '@/components/Chess/CapturedPieces';
@@ -11,13 +10,10 @@ import TopGameBar from '@/components/Chess/TopGameBar';
 import Panel from '@/components/Chess/Panel';
 import EngineSettings from '@/components/Chess/EngineSettings';
 import EvaluationGraph from '@/components/Chess/EvaluationGraph';
-import OpeningExplorerPreview from '@/components/Chess/OpeningExplorerPreview';
-import GameTimeline from '@/components/Chess/GameTimeline';
 import GameNavigation from '@/components/Chess/GameNavigation';
 
 export default function HomePage() {
   const {
-    fen,
     moves,
     evaluation,
     onDrop,
