@@ -114,6 +114,12 @@ export default function HomePage() {
   return (
     <AuthGate>
       <AppShell point={selectedCoachPoint}>
+      <GameStatus
+        status={gameStatus}
+        winner={winner}
+        onNewGame={newGame}
+      />
+
       <div className="grid grid-cols-[minmax(520px,1fr)_420px] gap-5">
         <section className="flex min-w-0 justify-center">
           <div
@@ -190,12 +196,6 @@ export default function HomePage() {
           <MoveHistory
             moves={moves}
             evaluationHistory={evaluationHistory}
-          />
-
-          <GameStatus
-            status={gameStatus}
-            winner={winner}
-            onNewGame={newGame}
           />
 
         </aside>
