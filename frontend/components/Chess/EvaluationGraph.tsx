@@ -13,16 +13,12 @@ import {
 interface Props {
   values: EvaluationPoint[];
   currentValue: number;
-  depth?: number;
-  time?: number;
-  moveTime?: number;
-  skillLevel?: number;
   previousValue?: number;
   lastPoint?: EvaluationPoint;
 }
 
 const CHART_WIDTH = 260;
-const CHART_HEIGHT = 120;
+const CHART_HEIGHT = 80;
 const MAX_EVAL = 5;
 
 function clamp(value: number) {
@@ -36,10 +32,6 @@ function clamp(value: number) {
 export default function EvaluationGraph({
   values,
   currentValue,
-  depth = 0,
-  time = 0,
-  moveTime = 0,
-  skillLevel = 0,
   lastPoint,
 }: Props) {
   const [hoveredIndex, setHoveredIndex] =
@@ -69,9 +61,9 @@ export default function EvaluationGraph({
     [values],
   );
 
-      const points = useMemo(
-        () =>
-          normalizedValues.map((point, index) => {
+  const points = useMemo(
+    () =>
+      normalizedValues.map((point, index) => {
       const x =
         normalizedValues.length === 1
           ? 0
@@ -139,37 +131,39 @@ export default function EvaluationGraph({
 
   return (
     <div>
-      <div className="mb-3 flex items-start justify-between">
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-300">
+      <div className="mb-2 flex items-start justify-between gap-4">
+        <h2 className="pt-1 text-sm font-semibold uppercase tracking-widest text-zinc-300">
           Evaluation Graph
         </h2>
 
-        <div
-          className={[
-            'text-4xl font-semibold leading-none',
-            isWhiteBetter
-              ? 'text-green-400'
-              : isBlackBetter
-                ? 'text-red-400'
-                : 'text-zinc-200',
-          ].join(' ')}
-        >
-          {formatEval(currentValue)}
-        </div>
-      </div>
+        <div className="text-right">
+          <div
+            className={[
+              'text-3xl font-semibold leading-none',
+              isWhiteBetter
+                ? 'text-green-400'
+                : isBlackBetter
+                  ? 'text-red-400'
+                  : 'text-zinc-200',
+            ].join(' ')}
+          >
+            {formatEval(currentValue)}
+          </div>
 
-      <div className="mb-4 text-right text-sm text-zinc-300">
-        {isWhiteBetter
-          ? 'White is better'
-          : isBlackBetter
-            ? 'Black is better'
-            : 'Equal'}
+          <div className="mt-1 text-xs text-zinc-300">
+            {isWhiteBetter
+              ? 'White is better'
+              : isBlackBetter
+                ? 'Black is better'
+                : 'Equal'}
+          </div>
+        </div>
       </div>
 
       <div className="relative">
         <svg
           viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
-          className="h-36 w-full overflow-visible"
+          className="h-24 w-full overflow-visible"
           onMouseMove={handleMouseMove}
           onMouseLeave={() => setHoveredIndex(null)}
         >
@@ -437,62 +431,6 @@ export default function EvaluationGraph({
           )}
         </div>
       )} */}
-
-      <div className="mt-5 grid grid-cols-2 gap-4 border-t border-white/10 pt-4">
-        <Stat label="Skill Level" value={skillLevel || '—'} />
-        <Stat label="Depth" value={depth || '—'} />
-        <Stat
-          label="Move Time"
-          value={moveTime ? `${moveTime}ms` : '—'}
-        />
-        <Stat label="Time" value={`${time || 0}s`} />
-      </div>
-    </div>
-  );
-}
-
-function Stat({
-  label,
-  value,
-}: {
-  label: string;
-  value: string | number;
-}) {
-  return (
-    <div>
-      <div className="text-sm text-zinc-500">{label}</div>
-      <div className="mt-1 text-lg text-zinc-100">{value}</div>
-    </div>
-  );
-}
-
-function MiniStat({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone?: 'positive' | 'negative';
-}) {
-  return (
-    <div className="rounded-xl bg-white/[0.04] px-3 py-2">
-      <div className="text-[11px] text-zinc-500">
-        {label}
-      </div>
-
-      <div
-        className={[
-          'mt-1 font-medium',
-          tone === 'positive'
-            ? 'text-green-400'
-            : tone === 'negative'
-              ? 'text-red-400'
-              : 'text-zinc-200',
-        ].join(' ')}
-      >
-        {value}
-      </div>
     </div>
   );
 }

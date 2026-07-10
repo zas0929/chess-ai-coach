@@ -7,7 +7,6 @@ import { useChessGame } from '@/hooks/useChessGame';
 import CapturedPieces from '@/components/Chess/CapturedPieces';
 import GameStatus from '@/components/Chess/GameStatus';
 import AppShell from '@/components/Chess/AppShell';
-import TopGameBar from '@/components/Chess/TopGameBar';
 import Panel from '@/components/Chess/Panel';
 import EngineSettings from '@/components/Chess/EngineSettings';
 import EvaluationGraph from '@/components/Chess/EvaluationGraph';
@@ -24,7 +23,6 @@ export default function HomePage() {
     selectPiece,
     possibleMoves,
     selectedSquare,
-    engineStats,
     material,
     checkedKingSquare,
     isCheckmate,
@@ -108,14 +106,6 @@ export default function HomePage() {
       <AppShell point={selectedCoachPoint}>
       <div className="grid grid-cols-[minmax(680px,1fr)_420px] gap-5">
         <section className="min-w-0">
-          <TopGameBar
-            playerColor={playerColor}
-            onChooseSide={chooseSide}
-            onFlipBoard={flipBoard}
-            onNewGame={newGame}
-            onUndo={undo}
-          />
-
           {/* <div className="mb-4 grid grid-cols-2 gap-4">
             <OpeningExplorerPreview />
             <GameTimeline moveCount={moves.length} />
@@ -140,24 +130,25 @@ export default function HomePage() {
           <CapturedPieces {...topCaptured} />
         </section>
 
-        <aside className="grid gap-4">
+        <aside className="grid content-start gap-2">
           <Panel>
             <EvaluationGraph
               values={evaluationHistory}
               currentValue={evaluation}
               lastPoint={selectedCoachPoint}
-              depth={engineStats?.depth}
-              time={engineStats?.time}
-              moveTime={engineStats?.move_time ?? moveTime}
-              skillLevel={engineStats?.skill_level ?? skillLevel}
             />
           </Panel>
 
-          <Panel>
+          <Panel density="compact">
             <GameNavigation
               currentPly={viewPly}
               totalPly={totalPly}
               isLive={isLivePosition}
+              playerColor={playerColor}
+              onChooseSide={chooseSide}
+              onUndo={undo}
+              onFlipBoard={flipBoard}
+              onNewGame={newGame}
               onFirst={goToFirstMove}
               onPrev={goToPreviousMove}
               onNext={goToNextMove}
@@ -165,7 +156,7 @@ export default function HomePage() {
             />
           </Panel>
 
-          <Panel>
+          <Panel density="compact">
             <EngineSettings
               skillLevel={skillLevel}
               moveTime={moveTime}

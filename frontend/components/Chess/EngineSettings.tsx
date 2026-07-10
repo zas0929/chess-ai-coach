@@ -17,7 +17,7 @@ export default function EngineSettings({
 }: Props) {
   return (
     <div>
-      <div className="mb-5 flex items-center justify-between">
+      <div className="mb-2 flex items-center justify-between">
         <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-300">
           Engine
         </h2>
@@ -28,9 +28,9 @@ export default function EngineSettings({
         </div>
       </div>
 
-      <div className="space-y-5">
-        <SettingSlider
-          label="Skill Level"
+      <div className="grid grid-cols-3 gap-1">
+        <CompactSetting
+          label="Skill"
           value={skillLevel}
           min={0}
           max={20}
@@ -38,8 +38,8 @@ export default function EngineSettings({
           onChange={onSkillLevelChange}
         />
 
-        <SettingSlider
-          label="Move Time"
+        <CompactSetting
+          label="Time"
           value={moveTime}
           min={100}
           max={5000}
@@ -48,7 +48,7 @@ export default function EngineSettings({
           onChange={onMoveTimeChange}
         />
 
-        <SettingSlider
+        <CompactSetting
           label="Depth"
           value={depth}
           min={1}
@@ -61,7 +61,7 @@ export default function EngineSettings({
   );
 }
 
-interface SettingSliderProps {
+interface CompactSettingProps {
   label: string;
   value: number;
   min: number;
@@ -71,7 +71,7 @@ interface SettingSliderProps {
   onChange: (value: number) => void;
 }
 
-function SettingSlider({
+function CompactSetting({
   label,
   value,
   min,
@@ -79,12 +79,14 @@ function SettingSlider({
   step,
   suffix = '',
   onChange,
-}: SettingSliderProps) {
+}: CompactSettingProps) {
   return (
-    <label className="block">
-      <div className="mb-2 flex items-center justify-between">
-        <span className="text-sm text-zinc-400">{label}</span>
-        <span className="text-sm font-medium text-zinc-100">
+    <label className="min-w-0 rounded-lg bg-white/[0.035] px-2 py-0.5">
+      <div className="mb-0.5 flex items-center justify-between gap-2">
+        <span className="truncate text-[11px] text-zinc-500">
+          {label}
+        </span>
+        <span className="shrink-0 text-[11px] font-medium text-zinc-100">
           {value}
           {suffix}
         </span>
@@ -97,7 +99,7 @@ function SettingSlider({
         max={max}
         step={step}
         onChange={(event) => onChange(Number(event.target.value))}
-        className="h-2 w-full cursor-pointer accent-violet-500"
+        className="h-0.5 w-full cursor-pointer accent-violet-500"
       />
     </label>
   );
