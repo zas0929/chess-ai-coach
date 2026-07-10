@@ -32,6 +32,22 @@ const openings = [
     moves: ['c4'],
   },
   {
+    name: 'Reti Opening',
+    moves: ['Nf3'],
+  },
+  {
+    name: 'Van Geet Opening',
+    moves: ['Nc3'],
+  },
+  {
+    name: "King's Fianchetto Opening",
+    moves: ['g3'],
+  },
+  {
+    name: 'Nimzowitsch-Larsen Attack',
+    moves: ['b3'],
+  },
+  {
     name: 'London System',
     moves: ['d4', 'd5', 'Bf4'],
   },

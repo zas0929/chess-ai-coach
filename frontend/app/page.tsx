@@ -11,6 +11,9 @@ import Panel from '@/components/Chess/Panel';
 import EngineSettings from '@/components/Chess/EngineSettings';
 import EvaluationGraph from '@/components/Chess/EvaluationGraph';
 import GameNavigation from '@/components/Chess/GameNavigation';
+import OpeningExplorerPreview from '@/components/Chess/OpeningExplorerPreview';
+import GameTimeline from '@/components/Chess/GameTimeline';
+import { detectOpening } from '@/utils/opening';
 
 export default function HomePage() {
   const {
@@ -58,6 +61,13 @@ export default function HomePage() {
           point.source === 'player' &&
           point.side === playerColor,
       );
+
+  const currentOpening =
+    selectedCoachPoint?.opening ??
+    [...evaluationHistory]
+      .reverse()
+      .find((point) => point.opening)?.opening ??
+    detectOpening(moves);
   
   const topCaptured =
     boardOrientation === 'white'
@@ -106,12 +116,15 @@ export default function HomePage() {
       <AppShell point={selectedCoachPoint}>
       <div className="grid grid-cols-[minmax(680px,1fr)_420px] gap-5">
         <section className="flex min-w-0 justify-center">
-          {/* <div className="mb-4 grid grid-cols-2 gap-4">
-            <OpeningExplorerPreview />
-            <GameTimeline moveCount={moves.length} />
-          </div> */}
-
           <div className="w-full max-w-[650px]">
+            <div className="mb-2 grid grid-cols-2 gap-2">
+              <OpeningExplorerPreview
+                opening={currentOpening}
+                moveCount={moves.length}
+              />
+              <GameTimeline moveCount={moves.length} />
+            </div>
+
             <CapturedPieces {...bottomCaptured} />
 
             <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] shadow-2xl">
