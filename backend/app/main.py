@@ -1,5 +1,8 @@
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.api.engine import router as engine_router
 from app.api.coach import router as coach_router
@@ -9,13 +12,23 @@ from app.db.base import Base
 from app.db import models  # noqa: F401
 from app.db.session import engine
 
+logger = logging.getLogger(__name__)
+
 app = FastAPI(title="Chess AI API")
 
 
 @app.on_event("startup")
 def startup():
     if engine:
-        Base.metadata.create_all(bind=engine)
+        try:
+            Base.metadata.create_all(bind=engine)
+        except SQLAlchemyError:
+            logger.exception(
+                "Database initialization failed. "
+                "The API will keep running, but DB-backed features "
+                "such as quota and billing may fail until DATABASE_URL "
+                "is reachable."
+            )
 
 app.add_middleware(
     CORSMiddleware,

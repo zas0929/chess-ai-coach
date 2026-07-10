@@ -8,7 +8,13 @@ from app.core.config import settings
 
 
 engine = (
-    create_engine(settings.database_url)
+    create_engine(
+        settings.database_url,
+        pool_pre_ping=True,
+        connect_args={
+            "connect_timeout": 5,
+        },
+    )
     if settings.database_url
     else None
 )
