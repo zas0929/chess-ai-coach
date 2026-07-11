@@ -197,16 +197,9 @@ function AccountSummary({
 
             <div className="my-3 h-px bg-white/10" />
 
-            <div
-                className={[
-                    'grid gap-3',
-                    isAuthReady && stats
-                        ? 'grid-cols-[1.1fr_1fr]'
-                        : 'grid-cols-1',
-                ].join(' ')}
-            >
+            <div className="grid gap-2">
                 {isAuthReady && (
-                    <div className="rounded-xl bg-white/[0.035] px-3 py-2">
+                    <div className="rounded-xl border border-white/5 bg-white/[0.035] px-3 py-2">
                         <div className="flex items-center justify-between gap-2">
                             <div className="min-w-0">
                                 <div className="text-[9px] uppercase tracking-[0.18em] text-zinc-500">
@@ -256,19 +249,27 @@ function AccountSummary({
                 )}
 
                 {stats && (
-                    <div className="grid grid-cols-2 gap-2 rounded-xl bg-white/[0.035] px-3 py-2 text-xs">
-                        <CompactStat label="Lvl" value={stats.level} />
-                        <CompactStat label="Games" value={stats.games_played} />
-                        <CompactStat label="AI" value={stats.ai_requests} />
-
-                        <div className="min-w-0 text-right">
-                            <div className="truncate text-[9px] uppercase tracking-[0.18em] text-zinc-500">
-                                W-D-L
-                            </div>
-                            <div className="font-semibold text-zinc-100">
-                                {stats.wins}-{stats.draws}-{stats.losses}
-                            </div>
-                        </div>
+                    <div className="grid grid-cols-4 gap-2">
+                        <MetricChip
+                            label="Level"
+                            value={stats.level}
+                            tone="violet"
+                        />
+                        <MetricChip
+                            label="Games"
+                            value={stats.games_played}
+                            tone="sky"
+                        />
+                        <MetricChip
+                            label="AI"
+                            value={stats.ai_requests}
+                            tone="emerald"
+                        />
+                        <MetricChip
+                            label="Record"
+                            value={`${stats.wins}/${stats.draws}/${stats.losses}`}
+                            tone="amber"
+                        />
                     </div>
                 )}
 
@@ -288,19 +289,33 @@ function AccountSummary({
     );
 }
 
-function CompactStat({
+function MetricChip({
     label,
     value,
+    tone,
 }: {
     label: string;
-    value: number;
+    value: number | string;
+    tone: 'violet' | 'sky' | 'emerald' | 'amber';
 }) {
+    const toneClass = {
+        violet: 'border-violet-400/15 bg-violet-400/10 text-violet-100',
+        sky: 'border-sky-400/15 bg-sky-400/10 text-sky-100',
+        emerald: 'border-emerald-400/15 bg-emerald-400/10 text-emerald-100',
+        amber: 'border-amber-400/15 bg-amber-400/10 text-amber-100',
+    }[tone];
+
     return (
-        <div className="min-w-0">
-            <div className="truncate text-[9px] uppercase tracking-[0.18em] text-zinc-500">
+        <div
+            className={[
+                'min-w-0 rounded-lg border px-2.5 py-2',
+                toneClass,
+            ].join(' ')}
+        >
+            <div className="truncate text-[9px] uppercase tracking-[0.14em] opacity-55">
                 {label}
             </div>
-            <div className="font-semibold text-zinc-100">
+            <div className="mt-0.5 truncate text-sm font-semibold">
                 {value}
             </div>
         </div>
