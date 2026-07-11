@@ -8,6 +8,7 @@ import { EvaluationPoint } from '@/types/evaluation';
 import { classifyMoveByEvalDrop } from '@/utils/classifyMove';
 import { EngineStats } from '@/types/engine';
 import { detectOpening } from '@/utils/opening';
+import { GameSnapshot } from '@/types/game';
 
 export function useChessGame() {
   // Один экземпляр игры на весь жизненный цикл компонента
@@ -133,6 +134,33 @@ export function useChessGame() {
   const goToLastMove = useCallback(() => {
     setViewPly(game.history().length);
   }, [game]);
+
+  const getGameSnapshot = useCallback((): GameSnapshot => ({
+    fen: game.fen(),
+    moves: game.history(),
+    player_color: playerColor,
+    evaluation,
+    evaluation_history: evaluationHistory,
+    last_move: lastMove,
+    game_status: gameStatus,
+    winner,
+    settings: {
+      skill_level: skillLevel,
+      move_time: moveTime,
+      depth,
+    },
+  }), [
+    game,
+    playerColor,
+    evaluation,
+    evaluationHistory,
+    lastMove,
+    gameStatus,
+    winner,
+    skillLevel,
+    moveTime,
+    depth,
+  ]);
 
   const findKingSquare = useCallback(() => {
     const turn = game.turn();
@@ -650,6 +678,62 @@ const chooseSide = useCallback(
     updateState,
   ]);
 
+  const restoreGame = useCallback((snapshot: GameSnapshot) => {
+    try {
+      game.reset();
+
+      snapshot.moves.forEach((move) => {
+        game.move(move);
+      });
+
+      setPlayerColor(snapshot.player_color);
+      setEvaluation(snapshot.evaluation);
+      setLastMove(snapshot.last_move);
+      setSelectedSquare(null);
+      setPossibleMoves([]);
+      setSkillLevel(snapshot.settings.skill_level);
+      setMoveTime(snapshot.settings.move_time);
+      setDepth(snapshot.settings.depth);
+      setEngineStats((stats) => ({
+        ...stats,
+        skill_level: snapshot.settings.skill_level,
+        move_time: snapshot.settings.move_time,
+        depth: snapshot.settings.depth,
+      }));
+      setEvaluationHistory(
+        snapshot.evaluation_history.length > 0
+          ? snapshot.evaluation_history
+          : [{
+            ply: 0,
+            fen: game.fen(),
+            fenBefore: game.fen(),
+            move: 'start',
+            moveNumber: 0,
+            side: 'white',
+            player: snapshot.player_color,
+            engine:
+              snapshot.player_color === 'white'
+                ? 'black'
+                : 'white',
+            history: [],
+            value: 0,
+            previousValue: null,
+            source: 'engine',
+            evalChange: 0,
+            bestMove: undefined,
+          }],
+      );
+
+      updateState();
+
+      setGameStatus(snapshot.game_status);
+      setWinner(snapshot.winner);
+      setViewPly(snapshot.moves.length);
+    } catch (error) {
+      console.error(error);
+    }
+  }, [game, updateState]);
+
   const undo = useCallback(() => {
     if (game.history().length === 0) {
       return;
@@ -726,5 +810,7 @@ const chooseSide = useCallback(
     goToPreviousMove,
     goToNextMove,
     goToLastMove,
+    getGameSnapshot,
+    restoreGame,
   };
 }

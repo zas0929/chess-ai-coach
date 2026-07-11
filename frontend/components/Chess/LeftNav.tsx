@@ -6,13 +6,16 @@ import Image from 'next/image';
 import { useAuth } from '@/components/Auth/AuthGate';
 import CoachPanel from '@/components/Chess/CoachPanel';
 import { EvaluationPoint } from '@/types/evaluation';
+import { PlayerStats } from '@/types/game';
 
 interface Props {
     point?: EvaluationPoint;
+    stats?: PlayerStats | null;
 }
 
 export default function LeftNav({
     point,
+    stats,
 }: Props) {
     const { session, isConfigured, signOut } = useAuth();
     const email = session?.user.email ?? 'Guest mode';
@@ -83,8 +86,38 @@ export default function LeftNav({
                 )}
             </div>
 
+            {stats && (
+                <div className="mb-4 grid grid-cols-3 gap-2 rounded-2xl border border-white/10 bg-white/[0.025] p-3">
+                    <StatItem label="Games" value={stats.games_played} />
+                    <StatItem label="Level" value={stats.level} />
+                    <StatItem label="AI" value={stats.ai_requests} />
+                    <StatItem label="Wins" value={stats.wins} />
+                    <StatItem label="Draws" value={stats.draws} />
+                    <StatItem label="Losses" value={stats.losses} />
+                </div>
+            )}
+
             <CoachPanel point={point} />
 
         </aside>
+    );
+}
+
+function StatItem({
+    label,
+    value,
+}: {
+    label: string;
+    value: number;
+}) {
+    return (
+        <div className="min-w-0 rounded-xl bg-white/[0.035] px-2 py-1.5">
+            <div className="truncate text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+                {label}
+            </div>
+            <div className="mt-0.5 text-sm font-semibold text-zinc-100">
+                {value}
+            </div>
+        </div>
     );
 }

@@ -7,6 +7,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.api.engine import router as engine_router
 from app.api.coach import router as coach_router
 from app.api.billing import router as billing_router
+from app.api.games import router as games_router
 from app.core.config import settings
 from app.db.base import Base
 from app.db import models  # noqa: F401
@@ -54,6 +55,12 @@ app.include_router(
     billing_router,
     prefix="/billing",
     tags=["billing"],
+)
+
+app.include_router(
+    games_router,
+    prefix="/games",
+    tags=["games"],
 )
 
 

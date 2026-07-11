@@ -1,6 +1,9 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
+
 import AuthGate from '@/components/Auth/AuthGate';
+import { useAuth } from '@/components/Auth/AuthGate';
 import ChessBoard from '@/components/Chess/ChessBoard';
 import MoveHistory from '@/components/Chess/MoveHistory';
 import { useChessGame } from '@/hooks/useChessGame';
@@ -13,12 +16,32 @@ import EvaluationGraph from '@/components/Chess/EvaluationGraph';
 import GameNavigation from '@/components/Chess/GameNavigation';
 import OpeningExplorerPreview from '@/components/Chess/OpeningExplorerPreview';
 import GameTimeline from '@/components/Chess/GameTimeline';
+import { GameService } from '@/services/game.service';
+import { PlayerStats } from '@/types/game';
 import { detectOpening } from '@/utils/opening';
 
 export default function HomePage() {
+  return (
+    <AuthGate>
+      <ChessApp />
+    </AuthGate>
+  );
+}
+
+function ChessApp() {
+  const { session, isConfigured } = useAuth();
+  const userId = session?.user.id;
+  const [playerStats, setPlayerStats] =
+    useState<PlayerStats | null>(null);
+  const [gameStorageReady, setGameStorageReady] =
+    useState(!isConfigured);
+  const saveAsNewGameRef = useRef(false);
+  const lastSavedSnapshotRef = useRef('');
+
   const {
     moves,
     evaluation,
+    thinking,
     onDrop,
     newGame,
     undo,
@@ -50,7 +73,117 @@ export default function HomePage() {
     goToPreviousMove,
     goToNextMove,
     goToLastMove,
+    getGameSnapshot,
+    restoreGame,
   } = useChessGame();
+
+  useEffect(() => {
+    if (!isConfigured || !userId) {
+      return;
+    }
+
+    let isCancelled = false;
+
+    void (async () => {
+      setGameStorageReady(false);
+
+      try {
+        const [activeGame, stats] = await Promise.all([
+          GameService.getActiveGame(),
+          GameService.getStats(),
+        ]);
+
+        if (isCancelled) {
+          return;
+        }
+
+        if (activeGame) {
+          restoreGame(activeGame);
+          lastSavedSnapshotRef.current =
+            JSON.stringify(activeGame);
+        }
+
+        setPlayerStats(stats);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        if (!isCancelled) {
+          setGameStorageReady(true);
+        }
+      }
+    })();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [isConfigured, restoreGame, userId]);
+
+  useEffect(() => {
+    if (
+      !isConfigured ||
+      !userId ||
+      !gameStorageReady ||
+      thinking ||
+      !isLivePosition
+    ) {
+      return;
+    }
+
+    const snapshot = getGameSnapshot();
+    const snapshotSignature = JSON.stringify(snapshot);
+
+    if (snapshotSignature === lastSavedSnapshotRef.current) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      void (async () => {
+        try {
+          const savedGame = saveAsNewGameRef.current
+            ? await GameService.startNewGame(snapshot)
+            : await GameService.saveActiveGame(snapshot);
+
+          saveAsNewGameRef.current = false;
+          lastSavedSnapshotRef.current = JSON.stringify(savedGame);
+
+          setPlayerStats(await GameService.getStats());
+        } catch (error) {
+          console.error(error);
+        }
+      })();
+    }, 600);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [
+    depth,
+    evaluation,
+    evaluationHistory,
+    gameStatus,
+    gameStorageReady,
+    getGameSnapshot,
+    isConfigured,
+    isLivePosition,
+    lastMove,
+    moveTime,
+    moves,
+    playerColor,
+    skillLevel,
+    thinking,
+    userId,
+    winner,
+  ]);
+
+  const handleNewGame = async () => {
+    saveAsNewGameRef.current = true;
+    await newGame();
+  };
+
+  const handleChooseSide = async (
+    color: 'white' | 'black' | 'random',
+  ) => {
+    saveAsNewGameRef.current = true;
+    await chooseSide(color);
+  };
 
   const selectedCoachPoint =
     [...evaluationHistory]
@@ -112,12 +245,11 @@ export default function HomePage() {
         };
 
   return (
-    <AuthGate>
-      <AppShell point={selectedCoachPoint}>
+      <AppShell point={selectedCoachPoint} stats={playerStats}>
       <GameStatus
         status={gameStatus}
         winner={winner}
-        onNewGame={newGame}
+        onNewGame={handleNewGame}
       />
 
       <div className="grid grid-cols-[minmax(520px,1fr)_420px] gap-5">
@@ -171,10 +303,10 @@ export default function HomePage() {
               totalPly={totalPly}
               isLive={isLivePosition}
               playerColor={playerColor}
-              onChooseSide={chooseSide}
+              onChooseSide={handleChooseSide}
               onUndo={undo}
               onFlipBoard={flipBoard}
-              onNewGame={newGame}
+              onNewGame={handleNewGame}
               onFirst={goToFirstMove}
               onPrev={goToPreviousMove}
               onNext={goToNextMove}
@@ -201,6 +333,5 @@ export default function HomePage() {
         </aside>
       </div>
       </AppShell>
-    </AuthGate>
   );
 }
