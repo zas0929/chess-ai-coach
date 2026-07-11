@@ -87,13 +87,21 @@ export default function LeftNav({
             </div>
 
             {stats && (
-                <div className="mb-4 grid grid-cols-3 gap-2 rounded-2xl border border-white/10 bg-white/[0.025] p-3">
-                    <StatItem label="Games" value={stats.games_played} />
-                    <StatItem label="Level" value={stats.level} />
-                    <StatItem label="AI" value={stats.ai_requests} />
-                    <StatItem label="Wins" value={stats.wins} />
-                    <StatItem label="Draws" value={stats.draws} />
-                    <StatItem label="Losses" value={stats.losses} />
+                <div className="mb-3 flex items-center justify-between gap-2 rounded-xl border border-white/10 bg-white/[0.025] px-3 py-2 text-xs">
+                    <CompactStat label="Lvl" value={stats.level} />
+                    <CompactStat label="Games" value={stats.games_played} />
+                    <CompactStat label="AI" value={stats.ai_requests} />
+
+                    <div className="h-5 w-px bg-white/10" />
+
+                    <div className="min-w-0 text-right">
+                        <div className="text-[9px] uppercase tracking-[0.18em] text-zinc-500">
+                            W-D-L
+                        </div>
+                        <div className="font-semibold text-zinc-100">
+                            {stats.wins}-{stats.draws}-{stats.losses}
+                        </div>
+                    </div>
                 </div>
             )}
 
@@ -103,7 +111,7 @@ export default function LeftNav({
     );
 }
 
-function StatItem({
+function CompactStat({
     label,
     value,
 }: {
@@ -111,11 +119,11 @@ function StatItem({
     value: number;
 }) {
     return (
-        <div className="min-w-0 rounded-xl bg-white/[0.035] px-2 py-1.5">
-            <div className="truncate text-[10px] uppercase tracking-[0.18em] text-zinc-500">
+        <div className="min-w-0">
+            <div className="truncate text-[9px] uppercase tracking-[0.18em] text-zinc-500">
                 {label}
             </div>
-            <div className="mt-0.5 text-sm font-semibold text-zinc-100">
+            <div className="font-semibold text-zinc-100">
                 {value}
             </div>
         </div>
