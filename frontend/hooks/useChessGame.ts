@@ -38,7 +38,7 @@ export function useChessGame() {
     time: 0,
     skill_level: 6,
     depth: 8,
-    move_time: 400,
+    move_time: 1000,
   });
 
   const [playerColor, setPlayerColor] = useState<'white' | 'black'>('white');
@@ -91,7 +91,7 @@ export function useChessGame() {
     useState<'white' | 'black' | null>(null);
   
   const [skillLevel, setSkillLevel] = useState(6);
-  const [moveTime, setMoveTime] = useState(400);
+  const [moveTime, setMoveTime] = useState(1000);
   const [depth, setDepth] = useState(8);
 
   const getFenAtPly = useCallback(

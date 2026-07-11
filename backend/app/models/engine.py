@@ -3,7 +3,7 @@ from typing import Optional
 from pydantic import BaseModel
 
 DEFAULT_SKILL_LEVEL = 6
-DEFAULT_MOVE_TIME = 400
+DEFAULT_MOVE_TIME = 1000
 DEFAULT_DEPTH = 8
 
 
