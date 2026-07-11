@@ -1,14 +1,10 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import Image from 'next/image';
 
 import { useAuth } from '@/components/Auth/AuthGate';
 import CoachPanel from '@/components/Chess/CoachPanel';
-import {
-    BillingService,
-    BillingStatus,
-} from '@/services/billing.service';
 import { EvaluationPoint } from '@/types/evaluation';
 import { PlayerStats } from '@/types/game';
 
@@ -22,10 +18,6 @@ export default function LeftNav({
     stats,
 }: Props) {
     const { session, isConfigured, signOut } = useAuth();
-    const [billingStatus, setBillingStatus] =
-        useState<BillingStatus | null>(null);
-    const [isBillingBusy, setIsBillingBusy] = useState(false);
-    const [billingError, setBillingError] = useState<string | null>(null);
     const email = session?.user.email ?? 'Guest mode';
     const avatarUrl =
         typeof session?.user.user_metadata.avatar_url === 'string'
@@ -37,52 +29,6 @@ export default function LeftNav({
         () => email.trim().charAt(0).toUpperCase() || 'G',
         [email],
     );
-
-    useEffect(() => {
-        if (!isConfigured || !session) {
-            return;
-        }
-
-        let isCancelled = false;
-
-        void (async () => {
-            try {
-                const status = await BillingService.getStatus();
-
-                if (!isCancelled) {
-                    setBillingStatus(status);
-                }
-            } catch (error) {
-                console.error(error);
-            }
-        })();
-
-        return () => {
-            isCancelled = true;
-        };
-    }, [isConfigured, session]);
-
-    const openBilling = async () => {
-        if (!session) {
-            return;
-        }
-
-        setIsBillingBusy(true);
-        setBillingError(null);
-
-        try {
-            const response = billingStatus?.is_pro
-                ? await BillingService.createPortalSession()
-                : await BillingService.createCheckoutSession();
-
-            window.location.href = response.url;
-        } catch (error) {
-            console.error(error);
-            setBillingError('Billing is not configured yet.');
-        } finally {
-            setIsBillingBusy(false);
-        }
-    };
 
     return (
         <aside className="w-[clamp(400px,26vw,540px)] shrink-0 border-r border-white/10 bg-[#0b1118] px-5 py-4">
@@ -139,47 +85,6 @@ export default function LeftNav({
                     </button>
                 )}
             </div>
-
-            {isConfigured && session && (
-                <div className="mb-3 rounded-xl border border-white/10 bg-white/[0.025] px-3 py-2">
-                    <div className="flex items-center justify-between gap-3">
-                        <div className="min-w-0">
-                            <div className="text-[9px] uppercase tracking-[0.18em] text-zinc-500">
-                                Plan
-                            </div>
-                            <div
-                                className={[
-                                    'mt-0.5 text-sm font-semibold',
-                                    billingStatus?.is_pro
-                                        ? 'text-emerald-300'
-                                        : 'text-zinc-100',
-                                ].join(' ')}
-                            >
-                                {billingStatus?.is_pro ? 'Pro' : 'Free'}
-                            </div>
-                        </div>
-
-                        <button
-                            type="button"
-                            onClick={openBilling}
-                            disabled={isBillingBusy}
-                            className="shrink-0 rounded-lg border border-violet-400/30 bg-violet-400/10 px-2.5 py-1.5 text-xs font-medium text-violet-200 transition hover:bg-violet-400/20 disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                            {isBillingBusy
-                                ? 'Opening'
-                                : billingStatus?.is_pro
-                                    ? 'Manage'
-                                    : 'Upgrade'}
-                        </button>
-                    </div>
-
-                    {billingError && (
-                        <div className="mt-2 text-xs text-yellow-200">
-                            {billingError}
-                        </div>
-                    )}
-                </div>
-            )}
 
             {stats && (
                 <div className="mb-3 flex items-center justify-between gap-2 rounded-xl border border-white/10 bg-white/[0.025] px-3 py-2 text-xs">

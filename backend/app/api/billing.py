@@ -9,7 +9,6 @@ from app.core.config import settings
 from app.db.models import BillingSubscription
 from app.db.session import get_db
 from app.models.billing import (
-    BillingStatusResponse,
     BillingPortalResponse,
     CheckoutSessionResponse,
 )
@@ -25,54 +24,6 @@ def _require_billing_config() -> None:
         )
 
     stripe.api_key = settings.stripe_secret_key
-
-
-def _get_subscription(
-    db: Optional[Session],
-    user_id: str,
-) -> Optional[BillingSubscription]:
-    if not db:
-        return None
-
-    return db.get(BillingSubscription, user_id)
-
-
-def _is_active_subscription(
-    subscription: Optional[BillingSubscription],
-) -> bool:
-    return bool(
-        subscription and
-        subscription.status in {"active", "trialing"},
-    )
-
-
-@router.get("/status", response_model=BillingStatusResponse)
-def get_billing_status(
-    db: Optional[Session] = Depends(get_db),
-    user: Optional[CurrentUser] = Depends(get_current_user),
-):
-    if not user:
-        raise HTTPException(
-            status_code=401,
-            detail="Authentication required",
-        )
-
-    subscription = _get_subscription(db, user.id)
-    is_pro = _is_active_subscription(subscription)
-
-    return BillingStatusResponse(
-        plan="pro" if is_pro else "free",
-        status=subscription.status if subscription else "free",
-        is_pro=is_pro,
-        stripe_customer_id=(
-            subscription.stripe_customer_id if subscription else None
-        ),
-        stripe_subscription_id=(
-            subscription.stripe_subscription_id
-            if subscription
-            else None
-        ),
-    )
 
 
 @router.post("/checkout", response_model=CheckoutSessionResponse)
@@ -94,36 +45,22 @@ def create_checkout_session(
             detail="STRIPE_PRICE_ID is not configured",
         )
 
-    subscription = _get_subscription(db, user.id)
-
-    checkout_params = {
-        "mode": "subscription",
-        "client_reference_id": user.id,
-        "line_items": [
+    session = stripe.checkout.Session.create(
+        mode="subscription",
+        customer_email=user.email,
+        client_reference_id=user.id,
+        line_items=[
             {
                 "price": settings.stripe_price_id,
                 "quantity": 1,
             },
         ],
-        "success_url": settings.billing_success_url,
-        "cancel_url": settings.billing_cancel_url,
-        "metadata": {
+        success_url=settings.billing_success_url,
+        cancel_url=settings.billing_cancel_url,
+        metadata={
             "user_id": user.id,
         },
-        "subscription_data": {
-            "metadata": {
-                "user_id": user.id,
-            },
-        },
-        "allow_promotion_codes": True,
-    }
-
-    if subscription and subscription.stripe_customer_id:
-        checkout_params["customer"] = subscription.stripe_customer_id
-    else:
-        checkout_params["customer_email"] = user.email
-
-    session = stripe.checkout.Session.create(**checkout_params)
+    )
 
     return CheckoutSessionResponse(url=session.url)
 
