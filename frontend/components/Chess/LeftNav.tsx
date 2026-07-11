@@ -196,70 +196,68 @@ function AccountSummary({
                 )}
             </div>
 
-            <div className="mt-2 flex items-end justify-between gap-3">
-                <div className="flex min-w-0 flex-1 items-end gap-3.5">
-                    <MetricItem
-                        label="Rank"
-                        value={stats?.level ?? 1}
-                    />
-                    <MetricItem
-                        label="Games"
-                        value={stats?.games_played ?? 0}
-                    />
-                    <MetricItem
-                        label="AI"
-                        value={isPro ? '∞' : stats?.ai_requests ?? 0}
-                    />
-                    <MetricItem
-                        label="Record"
-                        value={
-                            <RecordValue
-                                wins={stats?.wins ?? 0}
-                                draws={stats?.draws ?? 0}
-                                losses={stats?.losses ?? 0}
-                            />
-                        }
-                    />
-                </div>
-
-                {isAuthReady && (
-                    <div className="flex shrink-0 items-center gap-2">
-                        <div className="min-w-0 text-right">
-                            <div className="text-[9px] uppercase tracking-[0.18em] text-zinc-500">
-                                Plan
-                            </div>
-                            <div className="mt-0.5 flex items-center justify-end gap-1.5">
-                                <span
-                                    className={[
-                                        'h-2 w-2 rounded-full',
-                                        isPro
-                                            ? 'bg-emerald-400'
-                                            : 'bg-violet-400',
-                                    ].join(' ')}
-                                />
-                                <span className="text-sm font-semibold text-zinc-100">
-                                    {isPro ? 'Pro' : 'Free'}
-                                </span>
-                                <span className="max-w-16 truncate text-[11px] text-zinc-500">
-                                    {status}
-                                </span>
-                            </div>
+            {isAuthReady && (
+                <div className="mt-2 flex items-center justify-between gap-3 rounded-xl bg-white/[0.035] px-3 py-2">
+                    <div className="min-w-0">
+                        <div className="text-[9px] uppercase tracking-[0.18em] text-zinc-500">
+                            Plan
                         </div>
-
-                        <button
-                            type="button"
-                            onClick={onOpenBilling}
-                            disabled={isBillingLoading}
-                            className="rounded-lg border border-violet-400/30 bg-violet-400/10 px-2.5 py-1 text-xs font-medium text-violet-100 transition hover:bg-violet-400/20 disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                            {isBillingLoading
-                                ? 'Opening'
-                                : isPro
-                                    ? 'Manage'
-                                    : 'Upgrade'}
-                        </button>
+                        <div className="mt-0.5 flex items-center gap-1.5">
+                            <span
+                                className={[
+                                    'h-2 w-2 rounded-full',
+                                    isPro
+                                        ? 'bg-emerald-400'
+                                        : 'bg-violet-400',
+                                ].join(' ')}
+                            />
+                            <span className="text-sm font-semibold text-zinc-100">
+                                {isPro ? 'Pro' : 'Free'}
+                            </span>
+                            <span className="truncate text-[11px] text-zinc-500">
+                                {status}
+                            </span>
+                        </div>
                     </div>
-                )}
+
+                    <button
+                        type="button"
+                        onClick={onOpenBilling}
+                        disabled={isBillingLoading}
+                        className="shrink-0 rounded-lg border border-violet-400/30 bg-violet-400/10 px-2.5 py-1 text-xs font-medium text-violet-100 transition hover:bg-violet-400/20 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                        {isBillingLoading
+                            ? 'Opening'
+                            : isPro
+                                ? 'Manage'
+                                : 'Upgrade'}
+                    </button>
+                </div>
+            )}
+
+            <div className="mt-2 grid grid-cols-[48px_60px_42px_minmax(0,1fr)] items-end gap-3">
+                <MetricItem
+                    label="Rank"
+                    value={stats?.level ?? 1}
+                />
+                <MetricItem
+                    label="Games"
+                    value={stats?.games_played ?? 0}
+                />
+                <MetricItem
+                    label="AI"
+                    value={isPro ? '∞' : stats?.ai_requests ?? 0}
+                />
+                <MetricItem
+                    label="Record"
+                    value={
+                        <RecordValue
+                            wins={stats?.wins ?? 0}
+                            draws={stats?.draws ?? 0}
+                            losses={stats?.losses ?? 0}
+                        />
+                    }
+                />
             </div>
 
             {billingError && (
