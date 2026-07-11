@@ -124,6 +124,9 @@ export default function AuthGate({ children }: Props) {
             : await supabase.auth.signUp({
                 email,
                 password,
+                options: {
+                  emailRedirectTo: window.location.origin,
+                },
               });
 
         if (result.error) {
