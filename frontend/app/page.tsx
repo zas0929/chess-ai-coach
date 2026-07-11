@@ -1,6 +1,11 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 
 import AuthGate from '@/components/Auth/AuthGate';
 import { useAuth } from '@/components/Auth/AuthGate';
@@ -12,6 +17,7 @@ import GameStatus from '@/components/Chess/GameStatus';
 import AppShell from '@/components/Chess/AppShell';
 import Panel from '@/components/Chess/Panel';
 import EngineSettings from '@/components/Chess/EngineSettings';
+import EngineIdeas from '@/components/Chess/EngineIdeas';
 import EvaluationGraph from '@/components/Chess/EvaluationGraph';
 import GameNavigation from '@/components/Chess/GameNavigation';
 import OpeningExplorerPreview from '@/components/Chess/OpeningExplorerPreview';
@@ -201,6 +207,15 @@ function ChessApp() {
     [...evaluationHistory]
       .reverse()
       .find((point) => point.opening)?.opening;
+
+  const engineSettings = useMemo(
+    () => ({
+      skill_level: skillLevel,
+      move_time: moveTime,
+      depth,
+    }),
+    [depth, moveTime, skillLevel],
+  );
   
   const topCaptured =
     boardOrientation === 'white'
@@ -322,6 +337,14 @@ function ChessApp() {
               onSkillLevelChange={setSkillLevel}
               onMoveTimeChange={setMoveTime}
               onDepthChange={setDepth}
+            />
+          </Panel>
+
+          <Panel density="compact">
+            <EngineIdeas
+              fen={displayedFen}
+              settings={engineSettings}
+              enabled={!thinking}
             />
           </Panel>
 

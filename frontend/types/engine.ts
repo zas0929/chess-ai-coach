@@ -49,3 +49,25 @@ export interface EngineAnalyzeMoveResponse {
   best_move?: string;
   stats?: EngineStats;
 }
+
+export interface EngineInsightRequest {
+  fen: string;
+  settings?: EngineSettings;
+  multipv?: number;
+}
+
+export interface EngineLine {
+  move: string;
+  evaluation: Evaluation;
+  line: string[];
+}
+
+export interface EngineInsightResponse {
+  fen: string;
+  evaluation: Evaluation;
+  best_move?: string | null;
+  top_moves: EngineLine[];
+  stats: EngineStats & {
+    multipv: number;
+  };
+}

@@ -26,3 +26,23 @@ class AnalyzeMoveRequest(BaseModel):
     fen_before: str
     fen_after: str
     settings: Optional[EngineSettings] = None
+
+
+class InsightRequest(BaseModel):
+    fen: str
+    settings: Optional[EngineSettings] = None
+    multipv: int = 3
+
+
+class EngineLine(BaseModel):
+    move: str
+    evaluation: dict
+    line: list[str]
+
+
+class EngineInsightResponse(BaseModel):
+    fen: str
+    evaluation: dict
+    best_move: Optional[str] = None
+    top_moves: list[EngineLine]
+    stats: dict

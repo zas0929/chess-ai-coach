@@ -1,12 +1,13 @@
 from fastapi import APIRouter
 
-from app.models.engine import MoveRequest, EvaluateRequest
 from app.services.stockfish_service import stockfish_service
 
 from app.models.engine import (
-    MoveRequest,
+    EngineInsightResponse,
     EvaluateRequest,
     AnalyzeMoveRequest,
+    InsightRequest,
+    MoveRequest,
 )
 
 router = APIRouter()
@@ -33,6 +34,15 @@ def analyze_move(data: AnalyzeMoveRequest):
         data.fen_before,
         data.fen_after,
         data.settings,
+    )
+
+
+@router.post("/insight", response_model=EngineInsightResponse)
+def insight(data: InsightRequest):
+    return stockfish_service.insight(
+        data.fen,
+        data.settings,
+        data.multipv,
     )
 
 @router.post("/explain")

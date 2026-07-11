@@ -6,6 +6,8 @@ import {
   EngineMoveResponse,
   EngineAnalyzeMoveRequest,
   EngineAnalyzeMoveResponse,
+  EngineInsightRequest,
+  EngineInsightResponse,
 } from '@/types/engine';
 
 export const EngineService = {
@@ -37,6 +39,17 @@ export const EngineService = {
     return (
       await api.post<EngineAnalyzeMoveResponse>(
         '/engine/analyze-move',
+        request,
+      )
+    ).data;
+  },
+
+  async getInsight(
+    request: EngineInsightRequest,
+  ): Promise<EngineInsightResponse> {
+    return (
+      await api.post<EngineInsightResponse>(
+        '/engine/insight',
         request,
       )
     ).data;
