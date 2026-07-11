@@ -2,7 +2,7 @@ const soundFiles = {
   move: '/sounds/move.mp3',
   capture: '/sounds/capture.mp3',
   check: '/sounds/check.mp3',
-  checkmate: '/sounds/check.mp3',
+  checkmate: '/sounds/checkmate.mp3',
   start: '/sounds/start.mp3',
   undo: '/sounds/move.mp3',
 };
