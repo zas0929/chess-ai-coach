@@ -112,8 +112,6 @@ export default function CoachPanel({ point }: Props) {
       <div>
         <SectionTitle />
 
-        {quota && <QuotaPill quota={quota} />}
-
         <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-sm text-zinc-400">
           Play your first move to start the analysis.
         </div>
@@ -217,8 +215,6 @@ export default function CoachPanel({ point }: Props) {
   return (
     <div>
       <SectionTitle />
-
-      {quota && <QuotaPill quota={quota} />}
 
       <div
         className={[
@@ -459,58 +455,6 @@ function handleCoachError(
   }
 
   throw error;
-}
-
-function QuotaPill({ quota }: { quota: QuotaInfo }) {
-  const isPro = !quota.enforced;
-  const usedLabel = isPro
-    ? `${quota.used} AI requests`
-    : `${quota.used}/${quota.limit} used`;
-  const progress = isPro
-    ? 100
-    : Math.min(
-      100,
-      Math.max(0, (quota.used / quota.limit) * 100),
-    );
-
-  return (
-    <div className="mb-3 rounded-xl border border-white/10 bg-white/[0.025] px-3 py-2">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <div className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
-            AI Coach
-          </div>
-          <div className="mt-0.5 text-xs font-medium text-zinc-300">
-            {isPro ? 'Pro plan' : 'Free plan'}
-          </div>
-        </div>
-
-        <div
-          className={[
-            'rounded-lg px-2 py-1 text-[11px] font-medium',
-            isPro
-              ? 'bg-emerald-500/10 text-emerald-300'
-              : quota.remaining > 0
-                ? 'bg-violet-400/10 text-violet-200'
-                : 'bg-yellow-500/10 text-yellow-200',
-          ].join(' ')}
-        >
-          {isPro
-            ? usedLabel
-            : `${quota.remaining} left`}
-        </div>
-      </div>
-
-      {!isPro && (
-        <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/10">
-          <div
-            className="h-full rounded-full bg-violet-400"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-      )}
-    </div>
-  );
 }
 
 function PaywallCallout({

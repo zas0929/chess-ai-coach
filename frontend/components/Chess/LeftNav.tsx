@@ -1,6 +1,7 @@
 'use client';
 
 import {
+    ReactNode,
     useEffect,
     useMemo,
     useState,
@@ -157,7 +158,7 @@ function AccountSummary({
     const status = billingStatus?.status ?? 'free';
 
     return (
-        <div className="mb-3 rounded-2xl border border-white/10 bg-white/[0.035] p-3 shadow-lg shadow-black/10">
+        <div className="mb-3 rounded-2xl border border-white/10 bg-white/[0.035] px-3 py-2.5 shadow-lg shadow-black/10">
             <div className="flex items-center gap-3">
                 {avatarUrl ? (
                     <Image
@@ -188,94 +189,75 @@ function AccountSummary({
                     <button
                         type="button"
                         onClick={onSignOut}
-                        className="shrink-0 rounded-lg border border-white/10 px-2.5 py-1.5 text-xs font-medium text-zinc-400 transition hover:border-violet-300/30 hover:bg-violet-400/10 hover:text-violet-100"
+                        className="shrink-0 rounded-lg border border-white/10 px-2.5 py-1 text-xs font-medium text-zinc-400 transition hover:border-violet-300/30 hover:bg-violet-400/10 hover:text-violet-100"
                     >
                         Sign out
                     </button>
                 )}
             </div>
 
-            <div className="my-3 h-px bg-white/10" />
+            <div className="mt-2 flex items-end justify-between gap-3">
+                <div className="flex min-w-0 flex-1 items-end gap-3.5">
+                    <MetricItem
+                        label="Rank"
+                        value={stats?.level ?? 1}
+                    />
+                    <MetricItem
+                        label="Games"
+                        value={stats?.games_played ?? 0}
+                    />
+                    <MetricItem
+                        label="AI"
+                        value={isPro ? '∞' : stats?.ai_requests ?? 0}
+                    />
+                    <MetricItem
+                        label="Record"
+                        value={
+                            <RecordValue
+                                wins={stats?.wins ?? 0}
+                                draws={stats?.draws ?? 0}
+                                losses={stats?.losses ?? 0}
+                            />
+                        }
+                    />
+                </div>
 
-            <div className="grid gap-2">
                 {isAuthReady && (
-                    <div className="rounded-xl border border-white/5 bg-white/[0.035] px-3 py-2">
-                        <div className="flex items-center justify-between gap-2">
-                            <div className="min-w-0">
-                                <div className="text-[9px] uppercase tracking-[0.18em] text-zinc-500">
-                                    Plan
-                                </div>
-                                <div className="mt-1 flex items-center gap-2">
-                                    <span
-                                        className={[
-                                            'h-2 w-2 rounded-full',
-                                            isPro
-                                                ? 'bg-emerald-400'
-                                                : 'bg-violet-400',
-                                        ].join(' ')}
-                                    />
-                                    <span className="text-sm font-semibold text-zinc-100">
-                                        {isPro ? 'Pro' : 'Free'}
-                                    </span>
-                                    <span className="truncate text-[11px] text-zinc-500">
-                                        {status}
-                                    </span>
-                                </div>
+                    <div className="flex shrink-0 items-center gap-2">
+                        <div className="min-w-0 text-right">
+                            <div className="text-[9px] uppercase tracking-[0.18em] text-zinc-500">
+                                Plan
                             </div>
-
-                            <button
-                                type="button"
-                                onClick={onOpenBilling}
-                                disabled={isBillingLoading}
-                                className="shrink-0 rounded-lg border border-violet-400/30 bg-violet-400/10 px-2.5 py-1.5 text-xs font-medium text-violet-100 transition hover:bg-violet-400/20 disabled:cursor-not-allowed disabled:opacity-60"
-                            >
-                                {isBillingLoading
-                                    ? 'Opening'
-                                    : isPro
-                                        ? 'Manage'
-                                        : 'Upgrade'}
-                            </button>
+                            <div className="mt-0.5 flex items-center justify-end gap-1.5">
+                                <span
+                                    className={[
+                                        'h-2 w-2 rounded-full',
+                                        isPro
+                                            ? 'bg-emerald-400'
+                                            : 'bg-violet-400',
+                                    ].join(' ')}
+                                />
+                                <span className="text-sm font-semibold text-zinc-100">
+                                    {isPro ? 'Pro' : 'Free'}
+                                </span>
+                                <span className="max-w-16 truncate text-[11px] text-zinc-500">
+                                    {status}
+                                </span>
+                            </div>
                         </div>
 
-                        <div className="mt-2 flex items-center justify-between gap-2 text-[11px] text-zinc-500">
-                            <span>AI requests</span>
-                            <span className="font-medium text-zinc-300">
-                                {isPro
-                                    ? 'Unlimited'
-                                    : `${stats?.ai_requests ?? 0} used`}
-                            </span>
-                        </div>
-                    </div>
-                )}
-
-                {stats && (
-                    <div className="grid grid-cols-4 gap-2">
-                        <MetricChip
-                            label="Level"
-                            value={stats.level}
-                            tone="violet"
-                        />
-                        <MetricChip
-                            label="Games"
-                            value={stats.games_played}
-                            tone="sky"
-                        />
-                        <MetricChip
-                            label="AI"
-                            value={stats.ai_requests}
-                            tone="emerald"
-                        />
-                        <MetricChip
-                            label="Record"
-                            value={`${stats.wins}/${stats.draws}/${stats.losses}`}
-                            tone="amber"
-                        />
-                    </div>
-                )}
-
-                {!isAuthReady && !stats && (
-                    <div className="col-span-2 rounded-xl bg-white/[0.035] px-3 py-2 text-xs text-zinc-500">
-                        Sign in to sync progress and unlock billing.
+                        <button
+                            type="button"
+                            onClick={onOpenBilling}
+                            disabled={isBillingLoading}
+                            className="rounded-lg border border-violet-400/30 bg-violet-400/10 px-2.5 py-1 text-xs font-medium text-violet-100 transition hover:bg-violet-400/20 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            {isBillingLoading
+                                ? 'Opening'
+                                : isPro
+                                    ? 'Manage'
+                                    : 'Upgrade'}
+                        </button>
                     </div>
                 )}
             </div>
@@ -289,35 +271,45 @@ function AccountSummary({
     );
 }
 
-function MetricChip({
+function MetricItem({
     label,
     value,
-    tone,
 }: {
     label: string;
-    value: number | string;
-    tone: 'violet' | 'sky' | 'emerald' | 'amber';
+    value: ReactNode;
 }) {
-    const toneClass = {
-        violet: 'border-violet-400/15 bg-violet-400/10 text-violet-100',
-        sky: 'border-sky-400/15 bg-sky-400/10 text-sky-100',
-        emerald: 'border-emerald-400/15 bg-emerald-400/10 text-emerald-100',
-        amber: 'border-amber-400/15 bg-amber-400/10 text-amber-100',
-    }[tone];
-
     return (
-        <div
-            className={[
-                'min-w-0 rounded-lg border px-2.5 py-2',
-                toneClass,
-            ].join(' ')}
-        >
-            <div className="truncate text-[9px] uppercase tracking-[0.14em] opacity-55">
+        <div className="min-w-0">
+            <div className="truncate text-[9px] uppercase tracking-[0.16em] text-zinc-500">
                 {label}
             </div>
-            <div className="mt-0.5 truncate text-sm font-semibold">
+            <div
+                className={[
+                    'mt-0.5 truncate text-xs font-semibold text-zinc-200',
+                ].join(' ')}
+            >
                 {value}
             </div>
         </div>
+    );
+}
+
+function RecordValue({
+    wins,
+    draws,
+    losses,
+}: {
+    wins: number;
+    draws: number;
+    losses: number;
+}) {
+    return (
+        <span className="flex items-center gap-1.5">
+            <span className="text-emerald-300">Win {wins}</span>
+            <span className="text-zinc-600">/</span>
+            <span className="text-zinc-200">Draw {draws}</span>
+            <span className="text-zinc-600">/</span>
+            <span className="text-red-300">Lose {losses}</span>
+        </span>
     );
 }
