@@ -3,6 +3,11 @@ import time
 from stockfish import Stockfish
 
 from app.core.config import settings
+from app.models.engine import (
+    DEFAULT_DEPTH,
+    DEFAULT_MOVE_TIME,
+    DEFAULT_SKILL_LEVEL,
+)
 
 class StockfishService:
 
@@ -11,14 +16,14 @@ class StockfishService:
             path=settings.stockfish_path
         )
 
-        self.engine.set_skill_level(10)
+        self.engine.set_skill_level(DEFAULT_SKILL_LEVEL)
 
     def best_move(self, fen: str, engine_settings=None):
         start_time = time.time()
 
-        skill_level = 10
-        move_time = 500
-        depth = 12
+        skill_level = DEFAULT_SKILL_LEVEL
+        move_time = DEFAULT_MOVE_TIME
+        depth = DEFAULT_DEPTH
 
         if engine_settings:
             skill_level = engine_settings.skill_level
@@ -48,8 +53,8 @@ class StockfishService:
     def evaluate(self, fen: str, engine_settings=None):
         start_time = time.time()
 
-        skill_level = 10
-        depth = 12
+        skill_level = DEFAULT_SKILL_LEVEL
+        depth = DEFAULT_DEPTH
 
         if engine_settings:
             skill_level = engine_settings.skill_level
@@ -78,8 +83,8 @@ class StockfishService:
     def analyze_move(self, fen_before: str, fen_after: str, engine_settings=None):
         start_time = time.time()
 
-        skill_level = 10
-        depth = 12
+        skill_level = DEFAULT_SKILL_LEVEL
+        depth = DEFAULT_DEPTH
 
         if engine_settings:
             skill_level = engine_settings.skill_level

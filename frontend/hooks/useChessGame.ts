@@ -36,9 +36,9 @@ export function useChessGame() {
 
   const [engineStats, setEngineStats] = useState<EngineStats>({
     time: 0,
-    skill_level: 10,
-    depth: 12,
-    move_time: 500,
+    skill_level: 6,
+    depth: 8,
+    move_time: 400,
   });
 
   const [playerColor, setPlayerColor] = useState<'white' | 'black'>('white');
@@ -90,9 +90,9 @@ export function useChessGame() {
   const [winner, setWinner] =
     useState<'white' | 'black' | null>(null);
   
-  const [skillLevel, setSkillLevel] = useState(10);
-  const [moveTime, setMoveTime] = useState(500);
-  const [depth, setDepth] = useState(12);
+  const [skillLevel, setSkillLevel] = useState(6);
+  const [moveTime, setMoveTime] = useState(400);
+  const [depth, setDepth] = useState(8);
 
   const getFenAtPly = useCallback(
     (ply: number) => {
