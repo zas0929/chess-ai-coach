@@ -4,11 +4,18 @@ import {
   CoachExplainRequest,
   CoachExplainResponse,
   CoachResponse,
+  QuotaInfo,
 } from '@/types/coach';
 import { EvaluationPoint } from '@/types/evaluation';
 import { api } from '@/lib/api';
 
 export const CoachService = {
+  async getQuota(): Promise<QuotaInfo> {
+    return (
+      await api.get<QuotaInfo>('/coach/quota')
+    ).data;
+  },
+
   explain(point: EvaluationPoint): CoachResponse {
     switch (point.classification) {
       case 'best':

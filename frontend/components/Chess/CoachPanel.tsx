@@ -1,6 +1,11 @@
 'use client';
 
-import { FormEvent, useMemo, useState } from 'react';
+import {
+  FormEvent,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { AxiosError } from 'axios';
 
 import MoveBadge from '@/components/Chess/MoveBadge';
@@ -50,6 +55,10 @@ export default function CoachPanel({ point }: Props) {
   const [paywallMessage, setPaywallMessage] =
     useState<string | null>(null);
 
+  const [isUpgrading, setIsUpgrading] = useState(false);
+  const [upgradeError, setUpgradeError] =
+    useState<string | null>(null);
+
   const coachContext = useMemo<
     CoachExplainRequest | null
   >(() => {
@@ -75,10 +84,35 @@ export default function CoachPanel({ point }: Props) {
     };
   }, [point]);
 
+  useEffect(() => {
+    let isCancelled = false;
+
+    void (async () => {
+      try {
+        const nextQuota = await CoachService.getQuota();
+
+        if (!isCancelled) {
+          setQuota(nextQuota);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    })();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, []);
+
+  const quotaExhausted =
+    Boolean(quota?.enforced && quota.remaining <= 0);
+
   if (!point || point.ply === 0) {
     return (
       <div>
         <SectionTitle />
+
+        {quota && <QuotaPill quota={quota} />}
 
         <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3 text-sm text-zinc-400">
           Play your first move to start the analysis.
@@ -91,6 +125,11 @@ export default function CoachPanel({ point }: Props) {
 
   const startCoachChat = async () => {
     if (!coachContext) return;
+
+    if (quotaExhausted) {
+      setPaywallMessage('You used your free AI coach messages.');
+      return;
+    }
 
     setIsExplaining(true);
 
@@ -113,6 +152,11 @@ export default function CoachPanel({ point }: Props) {
     event.preventDefault();
 
     if (!coachContext || !draftMessage.trim()) {
+      return;
+    }
+
+    if (quotaExhausted) {
+      setPaywallMessage('You used your free AI coach messages.');
       return;
     }
 
@@ -152,15 +196,29 @@ export default function CoachPanel({ point }: Props) {
   };
 
   const upgrade = async () => {
-    const response =
-      await BillingService.createCheckoutSession();
+    setIsUpgrading(true);
+    setUpgradeError(null);
 
-    window.location.href = response.url;
+    try {
+      const response =
+        await BillingService.createCheckoutSession();
+
+      window.location.href = response.url;
+    } catch (error) {
+      console.error(error);
+      setUpgradeError(
+        'Upgrade is not available yet. Check Stripe settings.',
+      );
+    } finally {
+      setIsUpgrading(false);
+    }
   };
 
   return (
     <div>
       <SectionTitle />
+
+      {quota && <QuotaPill quota={quota} />}
 
       <div
         className={[
@@ -260,7 +318,7 @@ export default function CoachPanel({ point }: Props) {
           {!coachBrief && (
             <button
               onClick={startCoachChat}
-              disabled={isExplaining}
+              disabled={isExplaining || quotaExhausted}
               className="inline-flex items-center gap-2 rounded-lg border border-violet-400/30 bg-violet-400/10 px-3 py-1.5 text-xs font-medium text-violet-200 transition hover:bg-violet-400/20 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isExplaining && (
@@ -328,12 +386,21 @@ export default function CoachPanel({ point }: Props) {
             onChange={(event) =>
               setDraftMessage(event.target.value)
             }
-            placeholder="Ask anything..."
+            disabled={quotaExhausted}
+            placeholder={
+              quotaExhausted
+                ? 'Upgrade to keep chatting'
+                : 'Ask anything...'
+            }
             className="min-w-0 flex-1 rounded-lg border border-white/10 bg-[#0b1118] px-3 py-1.5 text-sm text-zinc-100 outline-none transition placeholder:text-zinc-600 focus:border-violet-400/60"
           />
 
           <button
-            disabled={isChatting || !draftMessage.trim()}
+            disabled={
+              isChatting ||
+              !draftMessage.trim() ||
+              quotaExhausted
+            }
             className="inline-flex items-center justify-center gap-2 rounded-lg border border-violet-400/30 bg-violet-400/15 px-3 py-1.5 text-sm font-medium text-violet-200 transition hover:bg-violet-400/25 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {isChatting && (
@@ -343,19 +410,16 @@ export default function CoachPanel({ point }: Props) {
           </button>
         </form>
 
-        {paywallMessage && (
-          <div className="mt-3 rounded-xl border border-yellow-500/20 bg-yellow-500/10 p-3">
-            <div className="text-sm font-medium text-yellow-100">
-              {paywallMessage}
-            </div>
-
-            <button
-              onClick={upgrade}
-              className="mt-3 rounded-lg bg-violet-500 px-3 py-2 text-xs font-medium text-white transition hover:bg-violet-400"
-            >
-              Upgrade
-            </button>
-          </div>
+        {(paywallMessage || quotaExhausted) && (
+          <PaywallCallout
+            message={
+              paywallMessage ??
+              'Free AI coach limit reached.'
+            }
+            isUpgrading={isUpgrading}
+            error={upgradeError}
+            onUpgrade={upgrade}
+          />
         )}
 
         {(lastUsage || quota) && (
@@ -368,7 +432,9 @@ export default function CoachPanel({ point }: Props) {
 
             {quota && (
               <span className="rounded-lg bg-white/[0.05] px-2 py-1">
-                Free left: {quota.remaining}/{quota.limit}
+                {quota.enforced
+                  ? `Free left: ${quota.remaining}/${quota.limit}`
+                  : 'Pro: unlimited coach'}
               </span>
             )}
           </div>
@@ -393,6 +459,98 @@ function handleCoachError(
   }
 
   throw error;
+}
+
+function QuotaPill({ quota }: { quota: QuotaInfo }) {
+  const isPro = !quota.enforced;
+  const usedLabel = isPro
+    ? `${quota.used} AI requests`
+    : `${quota.used}/${quota.limit} used`;
+  const progress = isPro
+    ? 100
+    : Math.min(
+      100,
+      Math.max(0, (quota.used / quota.limit) * 100),
+    );
+
+  return (
+    <div className="mb-3 rounded-xl border border-white/10 bg-white/[0.025] px-3 py-2">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <div className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
+            AI Coach
+          </div>
+          <div className="mt-0.5 text-xs font-medium text-zinc-300">
+            {isPro ? 'Pro plan' : 'Free plan'}
+          </div>
+        </div>
+
+        <div
+          className={[
+            'rounded-lg px-2 py-1 text-[11px] font-medium',
+            isPro
+              ? 'bg-emerald-500/10 text-emerald-300'
+              : quota.remaining > 0
+                ? 'bg-violet-400/10 text-violet-200'
+                : 'bg-yellow-500/10 text-yellow-200',
+          ].join(' ')}
+        >
+          {isPro
+            ? usedLabel
+            : `${quota.remaining} left`}
+        </div>
+      </div>
+
+      {!isPro && (
+        <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/10">
+          <div
+            className="h-full rounded-full bg-violet-400"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PaywallCallout({
+  message,
+  isUpgrading,
+  error,
+  onUpgrade,
+}: {
+  message: string;
+  isUpgrading: boolean;
+  error: string | null;
+  onUpgrade: () => void;
+}) {
+  return (
+    <div className="mt-3 rounded-xl border border-yellow-500/20 bg-yellow-500/10 p-3">
+      <div className="text-sm font-medium text-yellow-100">
+        {message}
+      </div>
+      <div className="mt-1 text-xs leading-5 text-yellow-100/70">
+        Upgrade to continue using Chat with Coach.
+      </div>
+
+      {error && (
+        <div className="mt-2 text-xs text-red-200">
+          {error}
+        </div>
+      )}
+
+      <button
+        onClick={onUpgrade}
+        disabled={isUpgrading}
+        className="mt-3 inline-flex items-center gap-2 rounded-lg bg-violet-500 px-3 py-2 text-xs font-medium text-white transition hover:bg-violet-400 disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {isUpgrading && (
+          <span className="h-3 w-3 animate-spin rounded-full border border-white/30 border-t-white" />
+        )}
+        {isUpgrading ? 'Opening checkout' : 'Upgrade'}
+      </button>
+    </div>
+  );
 }
 
 function TypingBubble() {

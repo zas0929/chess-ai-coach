@@ -11,6 +11,7 @@ from app.models.coach import (
     CoachChatResponse,
     CoachExplainRequest,
     CoachExplainResponse,
+    QuotaInfo,
 )
 from app.services.coach.coach_service import coach_service
 from app.services.usage_service import (
@@ -19,6 +20,14 @@ from app.services.usage_service import (
 )
 
 router = APIRouter()
+
+
+@router.get("/quota", response_model=QuotaInfo)
+def quota(
+    db: Optional[Session] = Depends(get_db),
+    user: Optional[CurrentUser] = Depends(get_current_user),
+):
+    return usage_service.get_quota(db, user)
 
 
 @router.post("/explain", response_model=CoachExplainResponse)
